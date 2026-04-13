@@ -1,4 +1,4 @@
-import 'models.dart';
+import 'user/models.dart';
 
 /// Globaler static holder für den eingeloggten User.
 /// Wird beim App-Start via [ConnectingPage] befüllt und

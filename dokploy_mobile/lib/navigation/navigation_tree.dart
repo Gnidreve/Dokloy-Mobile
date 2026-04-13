@@ -126,11 +126,6 @@ const navigationTree = <NavigationGroup>[
             icon: LucideIcons.bell,
           ),
           NavigationItem(
-            label: 'Profile',
-            route: '/profile',
-            icon: LucideIcons.user,
-          ),
-          NavigationItem(
             label: 'Remote Servers',
             route: '/remote-servers',
             icon: LucideIcons.server,

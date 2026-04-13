@@ -1,0 +1,1 @@
+// GET ?applicationId=string

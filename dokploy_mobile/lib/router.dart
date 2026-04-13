@@ -144,6 +144,12 @@ class _ShellWrapper extends StatelessWidget {
     return Scaffold(
       drawer: AppDrawer(onToggleTheme: onToggleTheme),
       appBar: AppBar(
+        titleSpacing: 0,
+        leadingWidth: 52,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: ShadSeparator.horizontal(margin: EdgeInsets.zero),
+        ),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(LucideIcons.panelLeft),
@@ -152,12 +158,15 @@ class _ShellWrapper extends StatelessWidget {
         ),
         title: Row(
           children: [
+            const SizedBox(width: 2),
             Container(
               width: 1,
-              height: 22,
-              color: Theme.of(context).dividerColor,
+              height: 18,
+              color: ShadTheme.of(
+                context,
+              ).colorScheme.mutedForeground.withValues(alpha: 0.35),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(child: _Breadcrumbs(location: location)),
           ],
         ),
@@ -191,7 +200,11 @@ class _Breadcrumbs extends StatelessWidget {
     }
 
     final crumbs = breadcrumbsForRoute(location);
-    return ShadBreadcrumb(children: [for (final crumb in crumbs) Text(crumb)]);
+    return ShadBreadcrumb(
+      spacing: 6,
+      separator: _MutedBreadcrumbSeparator(),
+      children: [for (final crumb in crumbs) Text(crumb)],
+    );
   }
 }
 
@@ -244,6 +257,8 @@ class _ProjectBreadcrumbsState extends State<_ProjectBreadcrumbs> {
             .firstOrNull;
 
         return ShadBreadcrumb(
+          spacing: 6,
+          separator: _MutedBreadcrumbSeparator(),
           children: [
             ShadBreadcrumbLink(
               onPressed: () => context.go('/projects'),
@@ -309,6 +324,16 @@ class _EnvironmentDropdown extends StatelessWidget {
           )
           .toList(),
       child: Text(label),
+    );
+  }
+}
+
+class _MutedBreadcrumbSeparator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ShadBreadcrumbSeparator(
+      color: ShadTheme.of(context).colorScheme.mutedForeground,
+      size: 12,
     );
   }
 }

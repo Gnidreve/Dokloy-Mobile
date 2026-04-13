@@ -1,5 +1,5 @@
 import '../_client.dart';
-import '../models.dart';
+import 'models.dart';
 import 'all.dart';
 
 class ProjectApi {

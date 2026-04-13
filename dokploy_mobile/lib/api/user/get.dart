@@ -1,5 +1,5 @@
 import '../_client.dart';
-import '../models.dart';
+import 'models.dart';
 
 Future<User> userGet(ApiClient client) async {
   final data = await client.get(

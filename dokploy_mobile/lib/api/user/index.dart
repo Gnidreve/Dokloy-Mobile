@@ -1,5 +1,5 @@
 import '../_client.dart';
-import '../models.dart';
+import 'models.dart';
 import 'assignPermissions.dart';
 import 'checkUserOrganizations.dart';
 import 'createApiKey.dart';
@@ -24,8 +24,7 @@ class UserApi {
 
   Future<User> get() => userGet(_client);
 
-  Future<Map<String, dynamic>> getPermissions() =>
-      userGetPermissions(_client);
+  Future<Map<String, dynamic>> getPermissions() => userGetPermissions(_client);
 
   Future<Map<String, dynamic>> createApiKey({required String name}) =>
       userCreateApiKey(_client, name: name);
@@ -42,8 +41,7 @@ class UserApi {
   Future<Map<String, dynamic>> checkUserOrganizations() =>
       userCheckUserOrganizations(_client);
 
-  Future<Map<String, dynamic>> generateToken() =>
-      userGenerateToken(_client);
+  Future<Map<String, dynamic>> generateToken() => userGenerateToken(_client);
 
   Future<Map<String, dynamic>> getContainerMetrics({required String appName}) =>
       userGetContainerMetrics(_client, appName: appName);
@@ -62,12 +60,14 @@ class UserApi {
   Future<Map<String, dynamic>> createUserWithCredentials({
     required String email,
     required String password,
-  }) => userCreateUserWithCredentials(_client, email: email, password: password);
+  }) =>
+      userCreateUserWithCredentials(_client, email: email, password: password);
 
   Future<void> assignPermissions({
     required String userId,
     required Map<String, dynamic> permissions,
-  }) => userAssignPermissions(_client, userId: userId, permissions: permissions);
+  }) =>
+      userAssignPermissions(_client, userId: userId, permissions: permissions);
 
   Future<void> update({
     String? firstName,
@@ -76,11 +76,11 @@ class UserApi {
     String? password,
     String? currentPassword,
   }) => userUpdate(
-        _client,
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        password: password,
-        currentPassword: currentPassword,
-      );
+    _client,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: password,
+    currentPassword: currentPassword,
+  );
 }

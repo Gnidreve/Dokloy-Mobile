@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -6,10 +7,7 @@ import '../../api/user_store.dart';
 import '../../navigation/navigation_tree.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({
-    super.key,
-    required this.onToggleTheme,
-  });
+  const AppDrawer({super.key, required this.onToggleTheme});
 
   final VoidCallback onToggleTheme;
 
@@ -54,42 +52,105 @@ class AppDrawer extends StatelessWidget {
   }
 }
 
-class _DrawerHeader extends StatelessWidget {
+class _DrawerHeader extends StatefulWidget {
+  @override
+  State<_DrawerHeader> createState() => _DrawerHeaderState();
+}
+
+class _DrawerHeaderState extends State<_DrawerHeader> {
+  final _popoverController = ShadPopoverController();
+
+  @override
+  void dispose() {
+    _popoverController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            'lib/assets/app-icon.svg',
-            width: 28,
-            height: 28,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-              BlendMode.srcIn,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: ShadPopover(
+            controller: _popoverController,
+            anchor: const ShadAnchorAuto(
+              followerAnchor: Alignment.topLeft,
+              targetAnchor: Alignment.bottomLeft,
+              offset: Offset(0, 6),
+            ),
+            popover: (context) =>
+                _OrganizationPopoverContent(width: constraints.maxWidth - 24),
+            child: InkWell(
+              onTap: _popoverController.toggle,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      'lib/assets/app-icon.svg',
+                      width: 28,
+                      height: 28,
+                      colorFilter: ColorFilter.mode(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'My Organization',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: ShadTheme.of(
+                          context,
+                        ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(LucideIcons.chevronsUpDown, size: 16),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
+        );
+      },
+    );
+  }
+}
+
+class _OrganizationPopoverContent extends StatelessWidget {
+  const _OrganizationPopoverContent({required this.width});
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
             child: Text(
-              'My Organization',
+              'Organizations',
               style: ShadTheme.of(
                 context,
-              ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
+              ).textTheme.small.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
+          const Divider(height: 1),
           ShadButton.ghost(
             onPressed: () {},
-            size: ShadButtonSize.sm,
-            child: const Icon(LucideIcons.chevronsUpDown),
-          ),
-          ShadButton.ghost(
-            onPressed: () {},
-            size: ShadButtonSize.sm,
-            child: const Icon(LucideIcons.bell),
+            width: double.infinity,
+            mainAxisAlignment: MainAxisAlignment.start,
+            child: const Text('My Organization'),
           ),
         ],
       ),
@@ -138,10 +199,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        label,
-        style: ShadTheme.of(context).textTheme.muted,
-      ),
+      child: Text(label, style: ShadTheme.of(context).textTheme.muted),
     );
   }
 }
@@ -206,10 +264,7 @@ class _DrawerFooterState extends State<_DrawerFooter> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
-                ShadAvatar(
-                  '',
-                  placeholder: Text(UserStore.current?.initials ?? '?'),
-                ),
+                const _UserAvatar(),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -267,6 +322,8 @@ class _AccountPopoverContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
+                const _UserAvatar(),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,6 +358,7 @@ class _AccountPopoverContent extends StatelessWidget {
             label: 'Profile',
             onTap: () => _navigate(context, '/profile'),
           ),
+          _PopoverItem(label: 'Organizations', onTap: onClose),
           const Divider(height: 1),
           _PopoverItem(
             label: 'Log out',
@@ -311,6 +369,49 @@ class _AccountPopoverContent extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _UserAvatar extends StatelessWidget {
+  const _UserAvatar();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = UserStore.current;
+    final imageUrl = _userImageUrl(user?.image);
+
+    return ShadAvatar(imageUrl, placeholder: Text(user?.initials ?? '?'));
+  }
+
+  String? _userImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return null;
+    }
+
+    final rawBaseUrl = dotenv.env['BASE_URL']?.trim() ?? '';
+    if (rawBaseUrl.isEmpty) {
+      return null;
+    }
+
+    var baseUrl = rawBaseUrl;
+    if ((baseUrl.startsWith('"') && baseUrl.endsWith('"')) ||
+        (baseUrl.startsWith("'") && baseUrl.endsWith("'"))) {
+      baseUrl = baseUrl.substring(1, baseUrl.length - 1);
+    }
+
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null || !uri.hasScheme) {
+      baseUrl = 'http://$baseUrl';
+    }
+
+    final normalizedBaseUrl = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final normalizedPath = imagePath.startsWith('/')
+        ? imagePath
+        : '/$imagePath';
+
+    return '$normalizedBaseUrl$normalizedPath';
   }
 }
 

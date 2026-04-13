@@ -10,20 +10,23 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShadTabs<String>(
-      value: 'account',
-      tabs: [
-        ShadTab(
-          value: 'account',
-          child: const Text('Account'),
-          content: const _AccountTab(),
-        ),
-        ShadTab(
-          value: 'api-keys',
-          child: const Text('API/CLI Keys'),
-          content: const _ApiKeysTab(),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ShadTabs<String>(
+        value: 'account',
+        tabs: [
+          ShadTab(
+            value: 'account',
+            content: const _AccountTab(),
+            child: const Text('Account'),
+          ),
+          ShadTab(
+            value: 'api-keys',
+            content: const _ApiKeysTab(),
+            child: const Text('API/CLI Keys'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -68,7 +71,13 @@ class _AccountTabState extends State<_AccountTab> {
     _lastName = TextEditingController(text: _initialLastName);
     _email = TextEditingController(text: _initialEmail);
 
-    for (final c in [_firstName, _lastName, _email, _currentPassword, _newPassword]) {
+    for (final c in [
+      _firstName,
+      _lastName,
+      _email,
+      _currentPassword,
+      _newPassword,
+    ]) {
       c.addListener(_onChanged);
     }
   }
@@ -77,7 +86,13 @@ class _AccountTabState extends State<_AccountTab> {
 
   @override
   void dispose() {
-    for (final c in [_firstName, _lastName, _email, _currentPassword, _newPassword]) {
+    for (final c in [
+      _firstName,
+      _lastName,
+      _email,
+      _currentPassword,
+      _newPassword,
+    ]) {
       c.removeListener(_onChanged);
       c.dispose();
     }
@@ -88,13 +103,14 @@ class _AccountTabState extends State<_AccountTab> {
     setState(() => _isSaving = true);
     try {
       await DokployApi().user.update(
-            firstName: _firstName.text.trim(),
-            lastName: _lastName.text.trim(),
-            email: _email.text.trim(),
-            password: _newPassword.text.isEmpty ? null : _newPassword.text,
-            currentPassword:
-                _currentPassword.text.isEmpty ? null : _currentPassword.text,
-          );
+        firstName: _firstName.text.trim(),
+        lastName: _lastName.text.trim(),
+        email: _email.text.trim(),
+        password: _newPassword.text.isEmpty ? null : _newPassword.text,
+        currentPassword: _currentPassword.text.isEmpty
+            ? null
+            : _currentPassword.text,
+      );
 
       if (!mounted) return;
 
@@ -251,10 +267,7 @@ class _ApiKeysTab extends StatelessWidget {
             children: [
               const Icon(LucideIcons.keyRound, size: 24),
               const SizedBox(width: 10),
-              Text(
-                'API/CLI Keys',
-                style: ShadTheme.of(context).textTheme.h3,
-              ),
+              Text('API/CLI Keys', style: ShadTheme.of(context).textTheme.h3),
             ],
           ),
           const SizedBox(height: 4),
@@ -287,9 +300,9 @@ class _ApiKeysTab extends StatelessWidget {
                     children: [
                       Text(
                         'TEST',
-                        style: ShadTheme.of(context).textTheme.p.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: ShadTheme.of(
+                          context,
+                        ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Row(

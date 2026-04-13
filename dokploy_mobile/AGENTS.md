@@ -26,6 +26,7 @@ Ziel: 1:1 Port der mobilen Webversion (visuell + funktional), strukturell angele
 | SVG | `flutter_svg` (via `shadcn_ui` re-exportiert, nur in `router.dart` direkt importiert) |
 | HTTP | `http ^1.2.2` |
 | Env-Konfiguration | `flutter_dotenv ^5.1.0` — Datei `.env` im Root |
+| Lokale Preferences | `shared_preferences ^2.5.3` — Theme-Persistenz |
 | Theme | `ShadSlateColorScheme` (light + dark) |
 
 ---
@@ -35,8 +36,12 @@ Ziel: 1:1 Port der mobilen Webversion (visuell + funktional), strukturell angele
 ```
 lib/
 ├── api/
-│   ├── dokploy_api.dart       # HTTP-Client gegen Dokploy-API
-│   ├── models.dart            # Datenmodelle (User, Project, Environment, Service, ...)
+│   ├── index.dart             # EINZIGER öffentlicher SDK-Einstiegspunkt (DokployApi)
+│   ├── _client.dart           # Shared API-Client
+│   ├── models.dart            # Uebergreifender Barrel + shared Models
+│   ├── deployment/            # deployment.all + deployment.queueList
+│   ├── project/               # project.all
+│   ├── user/                  # user.*
 │   └── user_store.dart        # Static holder für eingeloggten User
 ├── pages/
 │   ├── connecting_page.dart       # Splash + Init-Call (außerhalb ShellRoute)
@@ -56,7 +61,8 @@ lib/
 │   ├── projects/
 │   │   ├── projects_page.dart         # Projektliste mit Filter/Sort + API
 │   │   └── project_detail_page.dart   # Projektdetail, Environment, Service, Tabs
-│   ├── deployments/deployments_page.dart
+│   ├── services/general/              # Typ-spezifische General-Seiten fuer Services
+│   ├── deployments/deployments_page.dart # Echte Deployment- und Queue-Tabellen via API
 │   ├── schedules/schedules_page.dart
 │   ├── remote_servers/remote_servers_page.dart
 │   ├── monitoring/            # Platzhalter
@@ -64,18 +70,18 @@ lib/
 │   ├── swarm/                 # Platzhalter
 │   ├── requests/              # Platzhalter
 │   ├── web_server/            # Statisches Domain-Formular ohne API-Anbindung
-│   ├── ssh_keys/              # Leere Unterseite
+│   ├── ssh_keys/              # Statischer Empty State + schließbares Modal ohne Inputs
 │   ├── ai/                    # Leere Unterseite
 │   ├── git/                   # Leere Unterseite
-│   ├── registry/              # Leere Unterseite
-│   ├── s3_destinations/       # Leere Unterseite
-│   ├── certificates/          # Leere Unterseite
+│   ├── registry/              # Statischer Empty State im Dokploy-Stil
+│   ├── s3_destinations/       # Statischer Empty State im Dokploy-Stil
+│   ├── certificates/          # Statischer Empty State im Dokploy-Stil
 │   ├── cluster/               # Leere Unterseite
-│   ├── notifications/         # Leere Unterseite
+│   ├── notifications/         # Statischer Empty State im Dokploy-Stil
 │   └── profile/               # Platzhalter
-├── main.dart                  # ShadApp.router, ThemeMode-State, dotenv.load
+├── main.dart                  # ShadApp.router, ThemeMode aus System oder Preferences, dotenv.load
 ├── router.dart                # createRouter(), ShellRoute, Breadcrumbs, alle Routen
-└── theme_notifier.dart        # ThemeNotifier (ValueNotifier) + ThemeNotifierProvider
+└── theme.dart                 # Zentrale Theme-Definitionen
 ```
 
 ---
@@ -152,12 +158,15 @@ Tippen auf den Footer öffnet via `ShadPopoverController` ein Menü nach oben mi
 - Schnelllinks
 - Log out
 
+`Profile` ist nicht mehr als normaler Sidebar-Eintrag sichtbar und wird nur noch ueber das User-Menue erreicht.
+
 ### Theme Toggle
 
-- `ThemeNotifier extends ValueNotifier<ThemeMode>` in [lib/theme_notifier.dart](lib/theme_notifier.dart)
-- `ThemeNotifierProvider extends InheritedNotifier` reicht den Notifier durch den Tree
-- `main.dart` hält den State, übergibt `themeMode` + `onToggleTheme` an `createRouter` und `AppDrawer`
-- **Kein externes State-Management-Package** — bewusste Entscheidung
+- `main.dart` hält den Theme-State lokal
+- Beim ersten Start wird das Theme aus `platformBrightness` des Systems abgeleitet
+- Wenn bereits eine lokale Preference gespeichert ist, überschreibt diese den Systemwert beim App-Start
+- Theme-Wechsel werden in `SharedPreferences` persistiert
+- `main.dart` übergibt `onToggleTheme` an `createRouter` und `AppDrawer`
 
 ---
 
@@ -219,18 +228,32 @@ await api.project.find(projectId);
 ```
 lib/api/
 ├── _client.dart          # ApiClient (get/post) + ApiException — nie direkt importieren
-├── index.dart            # EINZIGER öffentlicher Einstiegspunkt — DokployApi { user, project, ... }
-├── models.dart           # Alle Datenmodelle
+├── index.dart            # EINZIGER öffentlicher Einstiegspunkt — DokployApi { user, project, deployment, service, ... }
+├── models.dart           # Shared Models + Re-Exports der Domaenen-Modelle
 ├── user_store.dart       # Static holder für eingeloggten User
+├── deployment/
+│   ├── index.dart        # DeploymentApi
+│   ├── models.dart       # Deployment + DeploymentQueueItem
+│   ├── all.dart
+│   └── queueList.dart
+├── service/
+│   ├── index.dart        # ServiceApi
+│   └── one.dart          # Dynamischer .one-Endpoint fuer serviceartige Slugs
+├── project/
+│   ├── index.dart        # ProjectApi
+│   ├── models.dart       # Project + ProjectEnvironment + ProjectService
+│   └── all.dart
+├── user/
+│   ├── index.dart        # UserApi
+│   ├── models.dart       # User
+│   ├── get.dart
+│   └── ...
 ├── {slug}/               # Ordnername = URL-Slug (z.B. "user" für /api/user.*)
 │   ├── index.dart        # {Slug}Api-Klasse — exponiert alle Methoden als Instanzmethoden
 │   ├── get.dart          # Eine Datei pro Endpoint-Methode
 │   ├── getPermissions.dart
 │   ├── createApiKey.dart
 │   └── ...
-└── project/
-    ├── index.dart        # ProjectApi
-    └── all.dart
 ```
 
 ### Konvention: Dateiname = Methoden-Teil der URL
@@ -317,14 +340,21 @@ Project
   └── List<ProjectEnvironment>
         ├── id, name, isDefault, serviceCount
         └── List<ProjectService>
-              └── id, name, type, status?
+              └── id, name, sourceKey, type, status?
 
 User
   └── id, email, firstName, lastName, image?
         computed: displayName, initials
+
+Deployment
+  └── id, serviceName, projectName, environmentName, serverName, title, type, status, createdAt
+
+DeploymentQueueItem
+  └── id, serviceName, projectName, environmentName, serverName, title, type, state, timestamp
 ```
 
-`Project.fromJson` / `ProjectEnvironment.fromJson` parsen die Dokploy-API-Response inkl. aller Service-Typen (Application, Compose, MariaDB, Mongo, MySQL, Postgres, Redis).
+`Project.fromJson` / `ProjectEnvironment.fromJson` parsen die Dokploy-API-Response inkl. aller Service-Typen (Application, Compose, MariaDB, Mongo, MySQL, Postgres, Redis). `ProjectService.sourceKey` enthaelt dabei den originalen API-Key wie `redis`, `postgres` oder `compose`.
+`ProjectService.endpointSlug` normalisiert dabei API-Sonderfaelle wie `applications` → `application`, damit `api.service.oneForProjectService(service)` den passenden `.one`-Endpoint automatisch treffen kann.
 
 ### Aktuell implementierte Slugs
 
@@ -332,6 +362,8 @@ User
 |---|---|---|
 | `user` | `UserApi` | `get`, `update`, `getPermissions`, `createApiKey`, `deleteApiKey`, `getInvitations`, `sendInvitation`, `generateToken`, `getMetricsToken`, `getContainerMetrics`, `getUserByToken`, `checkUserOrganizations`, `createUserWithCredentials`, `assignPermissions`, `remove`, `session` |
 | `project` | `ProjectApi` | `all`, `find(id)` *(find = lokal, kein eigener Endpoint)* |
+| `deployment` | `DeploymentApi` | `all`, `queueList` |
+| `service` | `ServiceApi` | `one(slug, id)`, `oneForProjectService(service)` |
 
 ---
 
@@ -391,6 +423,7 @@ bool get _isDirty =>
 ## Assets
 
 - `lib/assets/app-icon.svg` — App-Logo (monochrom, ein File für Light+Dark via `ColorFilter.mode(..., BlendMode.srcIn)`)
+- `lib/assets/enviroments/` — Service-Icons fuer Environment-Karten; Dateinamen werden zur Laufzeit gegen `ProjectService.sourceKey` normalisiert gematcht, damit neue Dateien ohne Codeaenderung automatisch auftauchen
 - `lib/assets/` — gesamtes Verzeichnis als Flutter-Asset registriert
 - `.env` — ebenfalls als Asset registriert
 
@@ -415,4 +448,6 @@ bool get _isDirty =>
 - **State Management:** Kein Package (Riverpod/Bloc) — ThemeNotifier via InheritedNotifier reicht aktuell; bei wachsender Komplexität evaluieren
 - **ShadProgress Splash:** Angefragt aber noch nicht implementiert
 - **`ServiceDetailPage`:** Tab-Inhalte sind noch Platzhalter (nur Tab-Label wird gezeigt)
+- **`General`-Tab unter Services:** rendert jetzt typ-spezifische Seiten fuer `applications`, `mariadb`, `mongo`, `mysql`, `postgres`, `redis` und `compose`
+- **Environment-Service-Karten:** zeigen Status jetzt als farbigen Punkt oben rechts statt Badge und laden Typ-Icons dynamisch aus `lib/assets/enviroments/`
 - **`_ProjectBreadcrumbs`** macht einen eigenen API-Call für den Projektnamen in der AppBar — selbes Cache-Problem wie oben
