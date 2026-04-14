@@ -101,8 +101,6 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Center(child: SizedBox(width: 56, height: 56)),
-                  const SizedBox(height: 24),
                   Text(
                     'Customer  Relationsships',
                     style: theme.textTheme.h2,
