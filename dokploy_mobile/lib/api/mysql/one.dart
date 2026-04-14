@@ -1,1 +1,0 @@
-// GET ?mysqlId=string
