@@ -22,17 +22,24 @@ class CustomersService {
   Future<void> update(
     String id, {
     required String name,
+    required String email,
+    required String phone,
     required String street,
     required int zip,
     required String town,
   }) async {
     await AuthService.instance.pb
         .collection('customers')
-        .update(id, body: {
-      'name': name,
-      'street': street,
-      'zip': zip,
-      'town': town,
-    });
+        .update(
+          id,
+          body: {
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'street': street,
+            'zip': zip,
+            'town': town,
+          },
+        );
   }
 }

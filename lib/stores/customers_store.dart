@@ -24,6 +24,8 @@ class CustomersStore extends ChangeNotifier with WidgetsBindingObserver {
         .where(
           (c) =>
               c.name.toLowerCase().contains(low) ||
+              c.email.toLowerCase().contains(low) ||
+              c.phone.toLowerCase().contains(low) ||
               c.street.toLowerCase().contains(low) ||
               c.town.toLowerCase().contains(low),
         )
@@ -56,8 +58,7 @@ class CustomersStore extends ChangeNotifier with WidgetsBindingObserver {
         // Alphabetisch einsortieren (passend zum Server-Sort 'name')
         final newItem = Customer.fromRecord(e.record!);
         final idx = list.indexWhere(
-          (c) =>
-              c.name.toLowerCase().compareTo(newItem.name.toLowerCase()) > 0,
+          (c) => c.name.toLowerCase().compareTo(newItem.name.toLowerCase()) > 0,
         );
         if (idx >= 0) {
           list.insert(idx, newItem);

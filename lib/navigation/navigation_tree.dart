@@ -45,11 +45,6 @@ const navigationTree = <NavigationGroup>[
             icon: LucideIcons.layoutDashboard,
           ),
           NavigationItem(
-            label: 'Settings',
-            route: '/settings',
-            icon: LucideIcons.settings,
-          ),
-          NavigationItem(
             label: 'Kontakte',
             route: '/customers',
             icon: LucideIcons.users,
@@ -68,6 +63,11 @@ const navigationTree = <NavigationGroup>[
             label: 'Rechnungen',
             route: '/invoices',
             icon: LucideIcons.fileText,
+          ),
+          NavigationItem(
+            label: 'E-Mails',
+            route: '/emails',
+            icon: LucideIcons.mail,
           ),
         ],
       ),
@@ -112,6 +112,12 @@ List<BreadcrumbSegment> breadcrumbsForRoute(String route) {
   if (route.startsWith('/invoices/')) {
     return const [
       BreadcrumbSegment('Rechnungen', parentRoute: '/invoices'),
+      BreadcrumbSegment('Details'),
+    ];
+  }
+  if (route.startsWith('/emails/')) {
+    return const [
+      BreadcrumbSegment('E-Mails', parentRoute: '/emails'),
       BreadcrumbSegment('Details'),
     ];
   }

@@ -65,10 +65,11 @@ lib/
     customers/                # Liste + Detail (Tabs: Allgemein / Akte)
     inquiries/                # Liste + Read-only Detail
     invoices/                 # Liste mit Suche, direction wird im Frontend ignoriert
+    emails/                   # Liste + Read-only Detail, zeigt subject sowie von/an
     contracts/                # Liste + Read-only Detail
   data/
-    models/                   # customer.dart, inquiry.dart, invoice.dart, contract.dart, todo_item.dart
-    services/                 # customers_service.dart, inquiries_service.dart, invoices_service.dart, contracts_service.dart, todos_service.dart
+    models/                   # customer.dart, inquiry.dart, invoice.dart, email_item.dart, contract.dart, todo_item.dart
+    services/                 # customers_service.dart, inquiries_service.dart, invoices_service.dart, emails_service.dart, contracts_service.dart, todos_service.dart
 ```
 
 ---
@@ -80,7 +81,7 @@ lib/
   2. **NavigationItem** in `navigation_tree.dart` → `navigationTree`
   3. **Breadcrumb-Regel** in `breadcrumbsForRoute()` in `navigation_tree.dart` (nur nötig bei Unterrouten wie `/customers/:id`)
 
-- Nav-Reihenfolge: Suche (`/search`) → Dashboard (`/home`) → Verträge (`/contracts`) → Kontakte → Anfragen → Rechnungen
+- Nav-Reihenfolge: Suche (`/search`) → Dashboard (`/home`) → Kontakte → Anfragen → Verträge → Rechnungen → E-Mails
 
 ---
 
@@ -103,9 +104,10 @@ lib/
 | Collection | Felder | Besonderheiten |
 |---|---|---|
 | `_superusers` | — | Einzige Auth-Collection |
-| `customers` | `name`, `street`, `zip` (number), `town` | PATCH via `CustomersService.update()` |
+| `customers` | `name`, `email`, `phone`, `street`, `zip` (number), `town` | PATCH via `CustomersService.update()` |
 | `inquiries` | `name`, `subject`, `email`, `message`, `created`, `customer` (relation) | Read-only im UI |
 | `invoices` | `title`, `total` (number), `direction` (enum: `incoming`/`outbounding`), `created`, `customer` (relation) | Frontend wertet `direction` nicht mehr aus; Liste ist ungefiltert mit Suche |
+| `emails` | `from`, `to`, `subject`, `body`, `created`, `updated`, `customer` (relation) | Read-only im UI; Liste zeigt `subject` plus `from`/`to`, Detail zeigt Body und klickbare Mail-Links, in der Kundenakte filterbar |
 | `contracts` | `keyword` (text), `is_active` (bool), `amount` (number), `customer` (relation) | Read-only im UI; in Akte-Tab sichtbar |
 | `todo` | `keyword` (text), `is_finished` (bool) | Nur im Dashboard; kein Hinzufügen im Frontend, nur Abhaken |
 

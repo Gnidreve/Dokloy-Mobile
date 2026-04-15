@@ -11,7 +11,9 @@ import 'pages/connecting_page.dart';
 import 'pages/contracts/contract_detail_page.dart';
 import 'pages/contracts/contracts_page.dart';
 import 'pages/customers/customer_detail_page.dart';
+import 'pages/emails/email_detail_page.dart';
 import 'pages/customers/customers_page.dart';
+import 'pages/emails/emails_page.dart';
 import 'pages/home/home_page.dart';
 import 'pages/inquiries/inquiries_page.dart';
 import 'pages/inquiries/inquiry_detail_page.dart';
@@ -22,6 +24,7 @@ import 'pages/search/search_page.dart';
 import 'pages/settings/settings_page.dart';
 import 'stores/contracts_store.dart';
 import 'stores/customers_store.dart';
+import 'stores/emails_store.dart';
 import 'stores/inquiries_store.dart';
 import 'stores/invoices_store.dart';
 import 'stores/todos_store.dart';
@@ -43,8 +46,8 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
       builder: (context, state, child) =>
           _ShellWrapper(onToggleTheme: onToggleTheme, child: child),
       routes: [
-        GoRoute(path: '/search',   builder: (_, _) => const SearchPage()),
-        GoRoute(path: '/home',     builder: (_, _) => const HomePage()),
+        GoRoute(path: '/search', builder: (_, _) => const SearchPage()),
+        GoRoute(path: '/home', builder: (_, _) => const HomePage()),
         GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
         GoRoute(
           path: '/customers',
@@ -52,9 +55,8 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => CustomerDetailPage(
-                customerId: state.pathParameters['id']!,
-              ),
+              builder: (_, state) =>
+                  CustomerDetailPage(customerId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -64,9 +66,8 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => InquiryDetailPage(
-                inquiryId: state.pathParameters['id']!,
-              ),
+              builder: (_, state) =>
+                  InquiryDetailPage(inquiryId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -76,9 +77,19 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => InvoiceDetailPage(
-                invoiceId: state.pathParameters['id']!,
-              ),
+              builder: (_, state) =>
+                  InvoiceDetailPage(invoiceId: state.pathParameters['id']!),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/emails',
+          builder: (_, _) => const EmailsPage(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder: (_, state) =>
+                  EmailDetailPage(emailId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -88,9 +99,8 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => ContractDetailPage(
-                contractId: state.pathParameters['id']!,
-              ),
+              builder: (_, state) =>
+                  ContractDetailPage(contractId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -120,6 +130,7 @@ class _ShellWrapperState extends State<_ShellWrapper> {
     CustomersStore.instance;
     InquiriesStore.instance;
     InvoicesStore.instance;
+    EmailsStore.instance;
     ContractsStore.instance;
     TodosStore.instance;
   }
@@ -155,10 +166,9 @@ class _ShellWrapperState extends State<_ShellWrapper> {
             Container(
               width: 1,
               height: 18,
-              color: ShadTheme.of(context)
-                  .colorScheme
-                  .mutedForeground
-                  .withValues(alpha: 0.35),
+              color: ShadTheme.of(
+                context,
+              ).colorScheme.mutedForeground.withValues(alpha: 0.35),
             ),
             const SizedBox(width: 14),
             ShadBreadcrumb(
@@ -178,12 +188,16 @@ class _ShellWrapperState extends State<_ShellWrapper> {
                           context.go(seg.parentRoute!);
                         }
                       },
-                      child: Text(seg.label,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      child: Text(
+                        seg.label,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     )
                   else
-                    Text(seg.label,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      seg.label,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
               ],
             ),
           ],

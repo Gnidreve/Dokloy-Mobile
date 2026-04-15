@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../components/app_toast/app_toast.dart';
 import '../../data/models/contract.dart';
+import '../../data/models/email_item.dart';
 import '../../data/models/inquiry.dart';
 import '../../data/models/invoice.dart';
 import '../../data/services/customers_service.dart';
 import '../../stores/contracts_store.dart';
+import '../../stores/emails_store.dart';
 import '../../stores/inquiries_store.dart';
 import '../../stores/invoices_store.dart';
 
@@ -24,6 +26,8 @@ class CustomerDetailPage extends StatefulWidget {
 
 class _CustomerDetailPageState extends State<CustomerDetailPage> {
   final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _streetController = TextEditingController();
   final _zipController = TextEditingController();
   final _townController = TextEditingController();
@@ -36,6 +40,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
 
   // Ursprungswerte für isDirty-Vergleich
   String _origName = '';
+  String _origEmail = '';
+  String _origPhone = '';
   String _origStreet = '';
   String _origZip = '';
   String _origTown = '';
@@ -46,6 +52,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     _load();
     for (final c in [
       _nameController,
+      _emailController,
+      _phoneController,
       _streetController,
       _zipController,
       _townController,
@@ -58,6 +66,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   void dispose() {
     for (final c in [
       _nameController,
+      _emailController,
+      _phoneController,
       _streetController,
       _zipController,
       _townController,
@@ -71,6 +81,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   void _checkDirty() {
     final dirty =
         _nameController.text != _origName ||
+        _emailController.text != _origEmail ||
+        _phoneController.text != _origPhone ||
         _streetController.text != _origStreet ||
         _zipController.text != _origZip ||
         _townController.text != _origTown;
@@ -86,10 +98,14 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
       final data = await CustomersService.instance.fetchOne(widget.customerId);
       if (!mounted) return;
       _origName = data.name;
+      _origEmail = data.email;
+      _origPhone = data.phone;
       _origStreet = data.street;
       _origZip = data.zip == 0 ? '' : data.zip.toString();
       _origTown = data.town;
       _nameController.text = _origName;
+      _emailController.text = _origEmail;
+      _phoneController.text = _origPhone;
       _streetController.text = _origStreet;
       _zipController.text = _origZip;
       _townController.text = _origTown;
@@ -108,12 +124,16 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
       await CustomersService.instance.update(
         widget.customerId,
         name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
         street: _streetController.text.trim(),
         zip: zip,
         town: _townController.text.trim(),
       );
       if (!mounted) return;
       _origName = _nameController.text;
+      _origEmail = _emailController.text;
+      _origPhone = _phoneController.text;
       _origStreet = _streetController.text;
       _origZip = _zipController.text;
       _origTown = _townController.text;
@@ -196,6 +216,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
               ? _AkteTab(customerId: widget.customerId)
               : _AllgemeinTab(
                   nameController: _nameController,
+                  emailController: _emailController,
+                  phoneController: _phoneController,
                   streetController: _streetController,
                   zipController: _zipController,
                   townController: _townController,
@@ -216,6 +238,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
 class _AllgemeinTab extends StatelessWidget {
   const _AllgemeinTab({
     required this.nameController,
+    required this.emailController,
+    required this.phoneController,
     required this.streetController,
     required this.zipController,
     required this.townController,
@@ -225,6 +249,8 @@ class _AllgemeinTab extends StatelessWidget {
   });
 
   final TextEditingController nameController;
+  final TextEditingController emailController;
+  final TextEditingController phoneController;
   final TextEditingController streetController;
   final TextEditingController zipController;
   final TextEditingController townController;
@@ -245,6 +271,30 @@ class _AllgemeinTab extends StatelessWidget {
               controller: nameController,
               label: const Text('Name'),
               placeholder: const Text('Kundenname'),
+              textInputAction: TextInputAction.next,
+              enabled: !saving,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: h,
+            child: ShadInputFormField(
+              controller: emailController,
+              label: const Text('E-Mail'),
+              placeholder: const Text('name@beispiel.de'),
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              enabled: !saving,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: h,
+            child: ShadInputFormField(
+              controller: phoneController,
+              label: const Text('Telefon'),
+              placeholder: const Text('+49 123 456789'),
+              keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.next,
               enabled: !saving,
             ),
@@ -321,6 +371,7 @@ class _AkteTabState extends State<_AkteTab> {
         InquiriesStore.instance,
         InvoicesStore.instance,
         ContractsStore.instance,
+        EmailsStore.instance,
       ]),
       builder: (context, _) => _buildContent(context),
     );
@@ -332,11 +383,13 @@ class _AkteTabState extends State<_AkteTab> {
     final loading =
         InquiriesStore.instance.loading ||
         InvoicesStore.instance.loading ||
-        ContractsStore.instance.loading;
+        ContractsStore.instance.loading ||
+        EmailsStore.instance.loading;
 
     final showInquiries = _filter == 'alle' || _filter == 'anfragen';
     final showInvoices = _filter == 'alle' || _filter == 'rechnungen';
     final showContracts = _filter == 'alle' || _filter == 'vertraege';
+    final showEmails = _filter == 'alle' || _filter == 'emails';
 
     final visibleInquiries = showInquiries
         ? InquiriesStore.instance.byCustomer(widget.customerId)
@@ -347,10 +400,14 @@ class _AkteTabState extends State<_AkteTab> {
     final visibleContracts = showContracts
         ? ContractsStore.instance.byCustomer(widget.customerId)
         : const <Contract>[];
+    final visibleEmails = showEmails
+        ? EmailsStore.instance.byCustomer(widget.customerId)
+        : const <EmailItem>[];
     final isEmpty =
         visibleInquiries.isEmpty &&
         visibleInvoices.isEmpty &&
-        visibleContracts.isEmpty;
+        visibleContracts.isEmpty &&
+        visibleEmails.isEmpty;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -364,11 +421,13 @@ class _AkteTabState extends State<_AkteTab> {
               ShadOption(value: 'anfragen', child: Text('Anfragen')),
               ShadOption(value: 'rechnungen', child: Text('Rechnungen')),
               ShadOption(value: 'vertraege', child: Text('Verträge')),
+              ShadOption(value: 'emails', child: Text('E-Mails')),
             ],
             selectedOptionBuilder: (_, v) => Text(switch (v) {
               'anfragen' => 'Anfragen',
               'rechnungen' => 'Rechnungen',
               'vertraege' => 'Verträge',
+              'emails' => 'E-Mails',
               _ => 'Alles',
             }),
             onChanged: (v) => setState(() => _filter = v ?? 'alle'),
@@ -419,6 +478,22 @@ class _AkteTabState extends State<_AkteTab> {
                   subtitle:
                       '${con.amount.toStringAsFixed(2).replaceAll('.', ',')} € · ${con.isActive ? 'Aktiv' : 'Inaktiv'}',
                   onTap: () => context.push('/contracts/${con.id}'),
+                ),
+            ],
+            if (showEmails && visibleEmails.isNotEmpty) ...[
+              if ((showInquiries && visibleInquiries.isNotEmpty) ||
+                  (showInvoices && visibleInvoices.isNotEmpty) ||
+                  (showContracts && visibleContracts.isNotEmpty))
+                const SizedBox(height: 16),
+              Text('E-Mails', style: theme.textTheme.muted),
+              const SizedBox(height: 8),
+              for (final email in visibleEmails)
+                _AkteCard(
+                  title: email.subject.trim().isEmpty
+                      ? '(Ohne Betreff)'
+                      : email.subject,
+                  subtitle: '${email.from} -> ${email.to}',
+                  onTap: () => context.push('/emails/${email.id}'),
                 ),
             ],
           ],
