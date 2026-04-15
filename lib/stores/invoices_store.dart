@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 import '../data/models/invoice.dart';
 import '../data/services/invoices_service.dart';
@@ -41,10 +42,24 @@ class InvoicesStore extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  void _applyEvent(RecordSubscriptionEvent e) {
+    if (e.record == null) return;
+    final list = List<Invoice>.of(items);
+    switch (e.action) {
+      case 'create':
+        list.insert(0, Invoice.fromRecord(e.record!)); // neueste zuerst (-created)
+      case 'update':
+        final idx = list.indexWhere((i) => i.id == e.record!.id);
+        if (idx >= 0) list[idx] = Invoice.fromRecord(e.record!);
+      case 'delete':
+        list.removeWhere((i) => i.id == e.record!.id);
+    }
+    items = list;
+    notifyListeners();
+  }
+
   void _subscribe() {
-    AuthService.instance.pb
-        .collection('invoices')
-        .subscribe('*', (_) => _load());
+    AuthService.instance.pb.collection('invoices').subscribe('*', _applyEvent);
   }
 
   void _unsubscribe() {
@@ -58,6 +73,7 @@ class InvoicesStore extends ChangeNotifier with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _unsubscribe();
       _subscribe();
+      _load();
     } else if (state == AppLifecycleState.paused) {
       _unsubscribe();
     }

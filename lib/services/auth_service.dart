@@ -10,7 +10,10 @@ class AuthService {
   static const _storageKey = 'pb_auth';
   static const _skipEnvLoginKey = 'skip_env_login';
 
-  final _storage = const FlutterSecureStorage();
+  // encryptedSharedPreferences vermeidet den langsamen Keystore-Init auf Android
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   late final PocketBase pb;
 

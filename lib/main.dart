@@ -11,18 +11,27 @@ import 'services/notifications_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  try {
-    await AuthService.instance.init();
-  } catch (_) {
-    // Falls init fehlschlägt: App trotzdem starten, ConnectingPage leitet zu /login
-    await AuthService.instance.initFallback();
-  }
-  await NotificationsService.instance.bootstrap();
-  runApp(const MyCrmApp());
+
+  // Auth-Init und Firebase-Bootstrap parallel starten; SharedPreferences
+  // gleichzeitig laden, damit kein Theme-Flash entsteht.
+  final prefsFuture = SharedPreferences.getInstance();
+
+  await Future.wait([
+    AuthService.instance.init().catchError((_) async {
+      await AuthService.instance.initFallback();
+    }),
+    NotificationsService.instance.bootstrap(),
+    prefsFuture,
+  ]);
+
+  final prefs = await prefsFuture;
+  runApp(MyCrmApp(initialThemePreference: prefs.getString('theme_mode')));
 }
 
 class MyCrmApp extends StatefulWidget {
-  const MyCrmApp({super.key});
+  const MyCrmApp({super.key, this.initialThemePreference});
+
+  final String? initialThemePreference;
 
   @override
   State<MyCrmApp> createState() => _MyCrmAppState();
@@ -37,24 +46,17 @@ class _MyCrmAppState extends State<MyCrmApp> {
   @override
   void initState() {
     super.initState();
-    _themeMode = _systemThemeMode();
-    _loadThemeModePreference();
+    // Präferenz wurde bereits in main() geladen — kein async-Flash mehr.
+    _themeMode =
+        _themeModeFromPreference(widget.initialThemePreference) ??
+        _systemThemeMode();
   }
 
   void _toggleTheme() {
-    final nextThemeMode = _themeMode == ThemeMode.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
+    final nextThemeMode =
+        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     setState(() => _themeMode = nextThemeMode);
     _persistThemeMode(nextThemeMode);
-  }
-
-  Future<void> _loadThemeModePreference() async {
-    final preferences = await SharedPreferences.getInstance();
-    final storedThemeMode = preferences.getString(_themeModePreferenceKey);
-    final themeMode = _themeModeFromPreference(storedThemeMode);
-    if (themeMode == null || !mounted) return;
-    setState(() => _themeMode = themeMode);
   }
 
   Future<void> _persistThemeMode(ThemeMode themeMode) async {
@@ -114,9 +116,8 @@ class _MyCrmAppState extends State<MyCrmApp> {
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: bg,
-              systemNavigationBarIconBrightness: isDark
-                  ? Brightness.light
-                  : Brightness.dark,
+              systemNavigationBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
               systemNavigationBarContrastEnforced: false,
               systemNavigationBarDividerColor: Colors.transparent,
             ),

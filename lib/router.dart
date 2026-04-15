@@ -20,7 +20,6 @@ import 'pages/invoices/invoices_page.dart';
 import 'pages/login/login_page.dart';
 import 'pages/search/search_page.dart';
 import 'pages/settings/settings_page.dart';
-import 'services/sync_service.dart';
 import 'stores/contracts_store.dart';
 import 'stores/customers_store.dart';
 import 'stores/inquiries_store.dart';
@@ -116,8 +115,8 @@ class _ShellWrapperState extends State<_ShellWrapper> {
   @override
   void initState() {
     super.initState();
-    SyncService.instance.init();
-    // Stores eager initialisieren — Daten laden & Realtime abonnieren
+    // Stores eager initialisieren — Daten laden & Realtime abonnieren.
+    // Jeder Store ist sein eigener Single Source of Truth; kein SyncService mehr.
     CustomersStore.instance;
     InquiriesStore.instance;
     InvoicesStore.instance;
@@ -212,7 +211,7 @@ class _NotificationLayerState extends State<_NotificationLayer> {
   @override
   void initState() {
     super.initState();
-    _sub = SyncService.instance.newInquiries.listen(_onNewInquiry);
+    _sub = InquiriesStore.instance.newInquiries.listen(_onNewInquiry);
   }
 
   @override

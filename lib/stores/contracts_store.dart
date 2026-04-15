@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 import '../data/models/contract.dart';
 import '../data/services/contracts_service.dart';
@@ -22,20 +23,39 @@ class ContractsStore extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> reload() => _load();
 
   Future<void> _load() async {
-    loading = true; error = null; notifyListeners();
+    loading = true;
+    error = null;
+    notifyListeners();
     try {
       items = await ContractsService.instance.fetchAll();
     } catch (e) {
       error = e.toString();
     } finally {
-      loading = false; notifyListeners();
+      loading = false;
+      notifyListeners();
     }
+  }
+
+  void _applyEvent(RecordSubscriptionEvent e) {
+    if (e.record == null) return;
+    final list = List<Contract>.of(items);
+    switch (e.action) {
+      case 'create':
+        list.insert(0, Contract.fromRecord(e.record!));
+      case 'update':
+        final idx = list.indexWhere((c) => c.id == e.record!.id);
+        if (idx >= 0) list[idx] = Contract.fromRecord(e.record!);
+      case 'delete':
+        list.removeWhere((c) => c.id == e.record!.id);
+    }
+    items = list;
+    notifyListeners();
   }
 
   void _subscribe() {
     AuthService.instance.pb
         .collection('contracts')
-        .subscribe('*', (_) => _load());
+        .subscribe('*', _applyEvent);
   }
 
   void _unsubscribe() {
@@ -49,6 +69,7 @@ class ContractsStore extends ChangeNotifier with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _unsubscribe();
       _subscribe();
+      _load();
     } else if (state == AppLifecycleState.paused) {
       _unsubscribe();
     }
