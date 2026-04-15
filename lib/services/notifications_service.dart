@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'auth_service.dart';
 
@@ -11,6 +12,10 @@ class NotificationsService extends ChangeNotifier {
   NotificationsService._();
 
   static final instance = NotificationsService._();
+  static const _channelId = 'mycrm_push_notifications';
+  static const _channelName = 'MyCRM Benachrichtigungen';
+  static const _channelDescription =
+      'Zeigt CRM-Benachrichtigungen als Android-Systemmeldung an.';
 
   bool _bootstrapped = false;
   bool _firebaseReady = false;
@@ -21,6 +26,10 @@ class NotificationsService extends ChangeNotifier {
   String? _serverToken;
   String? _lastError;
   StreamSubscription<String>? _tokenRefreshSubscription;
+  StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+  bool _localNotificationsReady = false;
 
   bool get isSupported => !kIsWeb && Platform.isAndroid;
   bool get loading => _loading;
@@ -55,14 +64,21 @@ class NotificationsService extends ChangeNotifier {
     await _ensureFirebaseReady();
     if (!_firebaseReady) return;
 
+    await _ensureLocalNotificationsReady();
+
     await _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
         .listen((token) => unawaited(_handleTokenRefresh(token)));
+    await _foregroundMessageSubscription?.cancel();
+    _foregroundMessageSubscription = FirebaseMessaging.onMessage.listen(
+      (message) => unawaited(_showForegroundNotification(message)),
+    );
   }
 
   @override
   void dispose() {
     _tokenRefreshSubscription?.cancel();
+    _foregroundMessageSubscription?.cancel();
     super.dispose();
   }
 
@@ -193,6 +209,30 @@ class NotificationsService extends ChangeNotifier {
     }
   }
 
+  Future<void> _ensureLocalNotificationsReady() async {
+    if (_localNotificationsReady || !isSupported) return;
+
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('ic_launcher_foreground'),
+    );
+    await _localNotifications.initialize(settings: initializationSettings);
+
+    const channel = AndroidNotificationChannel(
+      _channelId,
+      _channelName,
+      description: _channelDescription,
+      importance: Importance.max,
+    );
+
+    final androidImplementation = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await androidImplementation?.createNotificationChannel(channel);
+
+    _localNotificationsReady = true;
+  }
+
   Future<void> _handleTokenRefresh(String token) async {
     _deviceToken = token;
     if ((_serverToken ?? '').isEmpty) {
@@ -209,6 +249,43 @@ class NotificationsService extends ChangeNotifier {
       _lastError = _friendlyError(e);
     }
     notifyListeners();
+  }
+
+  Future<void> _showForegroundNotification(RemoteMessage message) async {
+    if (!_localNotificationsReady) return;
+
+    final notification = message.notification;
+    final title = notification?.title?.trim() ?? '';
+    final body = notification?.body?.trim() ?? '';
+    if (title.isEmpty && body.isEmpty) return;
+
+    final androidImplementation = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final notificationsEnabled = await androidImplementation
+        ?.areNotificationsEnabled();
+    if (notificationsEnabled == false) return;
+
+    final notificationId = DateTime.now().millisecondsSinceEpoch.remainder(
+      1 << 31,
+    );
+
+    await _localNotifications.show(
+      id: notificationId,
+      title: title.isEmpty ? null : title,
+      body: body.isEmpty ? null : body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: 'ic_launcher_foreground',
+        ),
+      ),
+    );
   }
 
   Future<void> _pushTokenToServer(String token) async {

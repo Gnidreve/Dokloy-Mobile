@@ -18,6 +18,7 @@
 | Theme-Persistenz | `shared_preferences` |
 | Env-Variablen | `flutter_dotenv` — Datei `.env` im Root, in `pubspec.yaml` als Asset registriert |
 | Mail-Links | `url_launcher` |
+| Push Notifications | Firebase Cloud Messaging (`firebase_core`, `firebase_messaging`) + `flutter_local_notifications` für Foreground-Anzeige auf Android |
 
 ---
 
@@ -28,6 +29,17 @@
 - Login-Ablauf: `ConnectingPage` → prüft Token → falls kein Token: `tryEnvLogin()` mit `.env`-Werten (`EMAIL`, `PASSWORD`) → sonst `LoginPage`.
 - Nach explizitem Logout wird das `.env`-Auto-Login unterdrückt, bis wieder ein manueller Login erfolgt.
 - `.env`-Keys: `BASE_URL`, `EMAIL`, `PASSWORD`.
+
+---
+
+## Push Notifications
+
+- Push-Benachrichtigungen sind aktuell nur für **Android** vorgesehen.
+- `NotificationsService` ist das zentrale Frontend-Setup für FCM und native Android-Benachrichtigungen.
+- Der Settings-Toggle fordert die Systemberechtigung an und speichert den aktuellen `device_token` am eingeloggten `_superusers`-Datensatz.
+- Im **Foreground** werden FCM-Nachrichten als native Android-Systembenachrichtigung über `flutter_local_notifications` angezeigt.
+- Im **Background** oder bei beendeter App werden FCM-Notifications über den nativen Android-/Firebase-Pfad angezeigt.
+- Das Frontend verarbeitet nur `title` und `body`; zusätzliche In-App-Benachrichtigungen oder Data-Payload-Logik sind aktuell nicht vorgesehen.
 
 ---
 
