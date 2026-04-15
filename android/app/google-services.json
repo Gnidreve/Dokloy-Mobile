@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "823467632716",
+    "project_id": "crm-push-4e3a2",
+    "storage_bucket": "crm-push-4e3a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823467632716:android:a21d310e0bbc1470df6ce9",
+        "android_client_info": {
+          "package_name": "com.everding.crm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDQ0iG-Jjl-55Uvmf4b_AbLUXUpk0ZHkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-package com.example.mycrm
+package com.everding.crm
 
 import io.flutter.embedding.android.FlutterActivity
 

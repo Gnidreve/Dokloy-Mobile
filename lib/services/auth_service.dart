@@ -54,6 +54,8 @@ class AuthService {
 
   RecordModel? get currentUser => pb.authStore.record;
 
+  String? get currentUserId => pb.authStore.record?.id;
+
   String get currentUserName =>
       pb.authStore.record?.getStringValue('name').trim() ?? '';
 
@@ -95,6 +97,30 @@ class AuthService {
     try {
       await _storage.write(key: _skipEnvLoginKey, value: 'true');
     } catch (_) {}
+  }
+
+  Future<RecordModel> refreshCurrentUser() async {
+    final userId = currentUserId;
+    if (userId == null || userId.isEmpty) {
+      throw StateError('Kein eingeloggter Benutzer vorhanden.');
+    }
+
+    final record = await pb.collection('_superusers').getOne(userId);
+    pb.authStore.save(pb.authStore.token, record);
+    return record;
+  }
+
+  Future<RecordModel> updateCurrentUser(Map<String, dynamic> body) async {
+    final userId = currentUserId;
+    if (userId == null || userId.isEmpty) {
+      throw StateError('Kein eingeloggter Benutzer vorhanden.');
+    }
+
+    final record = await pb
+        .collection('_superusers')
+        .update(userId, body: body);
+    pb.authStore.save(pb.authStore.token, record);
+    return record;
   }
 
   Future<bool> _shouldSkipEnvLogin() async {

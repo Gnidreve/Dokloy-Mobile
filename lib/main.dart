@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'router.dart';
 import 'services/auth_service.dart';
+import 'services/notifications_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ Future<void> main() async {
     // Falls init fehlschlägt: App trotzdem starten, ConnectingPage leitet zu /login
     await AuthService.instance.initFallback();
   }
+  await NotificationsService.instance.bootstrap();
   runApp(const MyCrmApp());
 }
 
