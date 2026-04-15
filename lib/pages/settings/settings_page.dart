@@ -89,33 +89,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       notifications.statusText,
                       style: theme.textTheme.muted,
                     ),
-                    if ((notifications.serverToken ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Server-Token: ${notifications.serverToken}',
-                        style: theme.textTheme.small.copyWith(
-                          color: theme.colorScheme.mutedForeground,
-                        ),
-                      ),
-                    ],
-                    if ((notifications.deviceToken ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Geräte-Token: ${notifications.deviceToken}',
-                        style: theme.textTheme.small.copyWith(
-                          color: theme.colorScheme.mutedForeground,
-                        ),
-                      ),
-                    ],
-                    if (notifications.lastError != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        notifications.lastError!,
-                        style: theme.textTheme.small.copyWith(
-                          color: theme.colorScheme.destructive,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),

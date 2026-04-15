@@ -45,6 +45,11 @@ const navigationTree = <NavigationGroup>[
             icon: LucideIcons.layoutDashboard,
           ),
           NavigationItem(
+            label: 'Settings',
+            route: '/settings',
+            icon: LucideIcons.settings,
+          ),
+          NavigationItem(
             label: 'Kontakte',
             route: '/customers',
             icon: LucideIcons.users,
