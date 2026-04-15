@@ -104,11 +104,11 @@ lib/
 | Collection | Felder | Besonderheiten |
 |---|---|---|
 | `_superusers` | — | Einzige Auth-Collection |
-| `customers` | `name`, `email`, `phone`, `street`, `zip` (number), `town` | PATCH via `CustomersService.update()` |
-| `inquiries` | `name`, `subject`, `email`, `message`, `created`, `customer` (relation) | Read-only im UI |
+| `customers` | `name`, `email`, `telefon`, `street`, `zip` (number), `town`, `send` | PATCH via `CustomersService.update()` |
+| `inquiries` | `name`, `email`, `telefon`, `message`, `created`, `customer` (relation) | Read-only im UI |
 | `invoices` | `title`, `total` (number), `direction` (enum: `incoming`/`outbounding`), `created`, `customer` (relation) | Frontend wertet `direction` nicht mehr aus; Liste ist ungefiltert mit Suche |
-| `emails` | `from`, `to`, `subject`, `body`, `created`, `updated`, `customer` (relation) | Read-only im UI; Liste zeigt `subject` plus `from`/`to`, Detail zeigt Body und klickbare Mail-Links, in der Kundenakte filterbar |
-| `contracts` | `keyword` (text), `is_active` (bool), `amount` (number), `customer` (relation) | Read-only im UI; in Akte-Tab sichtbar |
+| `emails` | `from`, `to`, `subject`, `body`, `is_send`, `created`, `updated` | Read-only im UI; Liste zeigt `subject` plus `from`/`to`, Detail zeigt Body und klickbare Mail-Links |
+| `contracts` | `keyword`, `customer`, `is_active` (bool), `created`, `updated` | Read-only im UI; in Akte-Tab sichtbar |
 | `todo` | `keyword` (text), `is_finished` (bool) | Nur im Dashboard; kein Hinzufügen im Frontend, nur Abhaken |
 
 ---

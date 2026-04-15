@@ -35,7 +35,7 @@ class CustomersService {
           body: {
             'name': name,
             'email': email,
-            'phone': phone,
+            'telefon': phone,
             'street': street,
             'zip': zip,
             'town': town,

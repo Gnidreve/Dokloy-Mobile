@@ -15,7 +15,7 @@ class Customer {
     id: r.id,
     name: r.getStringValue('name'),
     email: r.getStringValue('email'),
-    phone: r.getStringValue('phone'),
+    phone: r.getStringValue('telefon'),
     street: r.getStringValue('street'),
     zip: (r.data['zip'] as num?)?.toInt() ?? 0,
     town: r.getStringValue('town'),

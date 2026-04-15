@@ -19,7 +19,8 @@ class SearchService {
             perPage: 10,
             filter:
                 'name ~ "$escaped" || email ~ "$escaped" || '
-                'phone ~ "$escaped" || street ~ "$escaped" || town ~ "$escaped"',
+                'telefon ~ "$escaped" || street ~ "$escaped" || '
+                'town ~ "$escaped"',
             sort: 'name',
           ),
       AuthService.instance.pb
@@ -27,17 +28,7 @@ class SearchService {
           .getList(
             page: 1,
             perPage: 10,
-            filter:
-                'name ~ "$escaped" || subject ~ "$escaped" || '
-                'email ~ "$escaped" || message ~ "$escaped"',
-            sort: '-created',
-          ),
-      AuthService.instance.pb
-          .collection('invoices')
-          .getList(
-            page: 1,
-            perPage: 10,
-            filter: 'title ~ "$escaped"',
+            filter: 'name ~ "$escaped" || email ~ "$escaped"',
             sort: '-created',
           ),
       AuthService.instance.pb
@@ -53,9 +44,7 @@ class SearchService {
           .getList(
             page: 1,
             perPage: 10,
-            filter:
-                'subject ~ "$escaped" || from ~ "$escaped" || '
-                'to ~ "$escaped" || body ~ "$escaped"',
+            filter: 'subject ~ "$escaped" || to ~ "$escaped"',
             sort: '-created',
           ),
     ]);
@@ -76,48 +65,30 @@ class SearchService {
       ...results[1].items.map(
         (r) => SearchResult(
           type: 'Anfrage',
-          title: r.getStringValue('subject').trim().isEmpty
-              ? r.getStringValue('name')
-              : r.getStringValue('subject'),
-          subtitle: _joinParts([
-            r.getStringValue('name'),
-            r.getStringValue('email'),
-          ]),
+          title: r.getStringValue('name').trim().isEmpty
+              ? r.getStringValue('email')
+              : r.getStringValue('name'),
+          subtitle: r.getStringValue('email'),
           route: '/inquiries/${r.id}',
           sortDate: _readDate(r.getStringValue('created')),
         ),
       ),
       ...results[2].items.map(
         (r) => SearchResult(
-          type: 'Rechnung',
-          title: r.getStringValue('title'),
-          subtitle: _currencySubtitle((r.data['total'] as num?)?.toDouble()),
-          route: '/invoices/${r.id}',
+          type: 'Vertrag',
+          title: r.getStringValue('keyword'),
+          subtitle: r.data['is_active'] == true ? 'Aktiv' : 'Inaktiv',
+          route: '/contracts/${r.id}',
           sortDate: _readDate(r.getStringValue('created')),
         ),
       ),
       ...results[3].items.map(
         (r) => SearchResult(
-          type: 'Vertrag',
-          title: r.getStringValue('keyword'),
-          subtitle: _joinParts([
-            _currencySubtitle((r.data['amount'] as num?)?.toDouble()),
-            r.data['is_active'] == true ? 'Aktiv' : 'Inaktiv',
-          ]),
-          route: '/contracts/${r.id}',
-          sortDate: _readDate(r.getStringValue('created')),
-        ),
-      ),
-      ...results[4].items.map(
-        (r) => SearchResult(
           type: 'E-Mail',
           title: r.getStringValue('subject').trim().isEmpty
               ? '(Ohne Betreff)'
               : r.getStringValue('subject'),
-          subtitle: _joinParts([
-            r.getStringValue('from'),
-            r.getStringValue('to'),
-          ], separator: ' -> '),
+          subtitle: r.getStringValue('to'),
           route: '/emails/${r.id}',
           sortDate: _readDate(r.getStringValue('created')),
         ),
@@ -141,11 +112,6 @@ class SearchService {
   }) {
     final joined = _joinParts([email, town]);
     return joined.isEmpty ? 'Kontakt' : joined;
-  }
-
-  static String _currencySubtitle(double? amount) {
-    if (amount == null) return '';
-    return '${amount.toStringAsFixed(2).replaceAll('.', ',')} €';
   }
 
   static String _joinParts(List<String> values, {String separator = ' · '}) {
