@@ -13,27 +13,73 @@ class _SearchPageState extends State<SearchPage> {
   String _query = '';
 
   static const _placeholderItems = <_SearchItem>[
-    _SearchItem(type: 'Kontakt',  title: 'Max Mustermann',     subtitle: 'Musterstraße 1, 12345 Berlin'),
-    _SearchItem(type: 'Kontakt',  title: 'Erika Musterfrau',   subtitle: 'Hauptstraße 5, 80331 München'),
-    _SearchItem(type: 'Kontakt',  title: 'Hans Beispiel GmbH', subtitle: 'Industrieweg 12, 20095 Hamburg'),
-    _SearchItem(type: 'Anfrage',  title: 'Website-Redesign',   subtitle: 'Max Mustermann · 10.03.2026'),
-    _SearchItem(type: 'Anfrage',  title: 'Support-Anfrage',    subtitle: 'Erika Musterfrau · 22.03.2026'),
-    _SearchItem(type: 'Rechnung', title: 'Jahresabschluss 2025', subtitle: 'Ausgang · 4.800,00 €'),
-    _SearchItem(type: 'Rechnung', title: 'Beratungshonorar Q1',  subtitle: 'Ausgang · 1.200,00 €'),
-    _SearchItem(type: 'Rechnung', title: 'Büromaterial',          subtitle: 'Eingang · 349,90 €'),
-    _SearchItem(type: 'Vertrag',  title: 'Wartungsvertrag 2026', subtitle: 'Aktiv · 2.400,00 €'),
-    _SearchItem(type: 'Vertrag',  title: 'Lizenzvertrag Software', subtitle: 'Aktiv · 960,00 €'),
-    _SearchItem(type: 'Vertrag',  title: 'Mietvertrag Lager',    subtitle: 'Inaktiv · 600,00 €'),
+    _SearchItem(
+      type: 'Kontakt',
+      title: 'Max Mustermann',
+      subtitle: 'Musterstraße 1, 12345 Berlin',
+    ),
+    _SearchItem(
+      type: 'Kontakt',
+      title: 'Erika Musterfrau',
+      subtitle: 'Hauptstraße 5, 80331 München',
+    ),
+    _SearchItem(
+      type: 'Kontakt',
+      title: 'Hans Beispiel GmbH',
+      subtitle: 'Industrieweg 12, 20095 Hamburg',
+    ),
+    _SearchItem(
+      type: 'Anfrage',
+      title: 'Website-Redesign',
+      subtitle: 'Max Mustermann · 10.03.2026',
+    ),
+    _SearchItem(
+      type: 'Anfrage',
+      title: 'Support-Anfrage',
+      subtitle: 'Erika Musterfrau · 22.03.2026',
+    ),
+    _SearchItem(
+      type: 'Rechnung',
+      title: 'Jahresabschluss 2025',
+      subtitle: 'Ausgang · 4.800,00 €',
+    ),
+    _SearchItem(
+      type: 'Rechnung',
+      title: 'Beratungshonorar Q1',
+      subtitle: 'Ausgang · 1.200,00 €',
+    ),
+    _SearchItem(
+      type: 'Rechnung',
+      title: 'Büromaterial',
+      subtitle: 'Eingang · 349,90 €',
+    ),
+    _SearchItem(
+      type: 'Vertrag',
+      title: 'Wartungsvertrag 2026',
+      subtitle: 'Aktiv · 2.400,00 €',
+    ),
+    _SearchItem(
+      type: 'Vertrag',
+      title: 'Lizenzvertrag Software',
+      subtitle: 'Aktiv · 960,00 €',
+    ),
+    _SearchItem(
+      type: 'Vertrag',
+      title: 'Mietvertrag Lager',
+      subtitle: 'Inaktiv · 600,00 €',
+    ),
   ];
 
   List<_SearchItem> get _filtered {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return _placeholderItems;
     return _placeholderItems
-        .where((i) =>
-            i.title.toLowerCase().contains(q) ||
-            i.subtitle.toLowerCase().contains(q) ||
-            i.type.toLowerCase().contains(q))
+        .where(
+          (i) =>
+              i.title.toLowerCase().contains(q) ||
+              i.subtitle.toLowerCase().contains(q) ||
+              i.type.toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -61,7 +107,7 @@ class _SearchPageState extends State<SearchPage> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: ShadInput(
             controller: _controller,
-            placeholder: const Text('Suchen …'),
+            placeholder: const Text('Alle Daten durchsuchen…'),
             leading: const Padding(
               padding: EdgeInsets.only(right: 8),
               child: Icon(LucideIcons.search, size: 16),
@@ -88,7 +134,9 @@ class _SearchPageState extends State<SearchPage> {
                     final item = items[i];
                     return ShadCard(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       child: Row(
                         children: [
                           Container(
@@ -112,18 +160,20 @@ class _SearchPageState extends State<SearchPage> {
                                 Text(
                                   item.title,
                                   style: theme.textTheme.p.copyWith(
-                                      fontWeight: FontWeight.w600),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 const SizedBox(height: 2),
-                                Text(item.subtitle,
-                                    style: theme.textTheme.muted),
+                                Text(
+                                  item.subtitle,
+                                  style: theme.textTheme.muted,
+                                ),
                               ],
                             ),
                           ),
                           Text(
                             item.type,
-                            style: theme.textTheme.muted
-                                .copyWith(fontSize: 11),
+                            style: theme.textTheme.muted.copyWith(fontSize: 11),
                           ),
                         ],
                       ),
@@ -136,10 +186,10 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   IconData _iconForType(String type) => switch (type) {
-    'Kontakt'  => LucideIcons.users,
-    'Anfrage'  => LucideIcons.mail,
+    'Kontakt' => LucideIcons.users,
+    'Anfrage' => LucideIcons.mail,
     'Rechnung' => LucideIcons.fileText,
-    _          => LucideIcons.fileText,
+    _ => LucideIcons.fileText,
   };
 }
 

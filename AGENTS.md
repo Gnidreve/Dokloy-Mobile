@@ -9,7 +9,7 @@
 | Schicht | Technologie |
 |---|---|
 | Framework | Flutter (Dart) |
-| UI-Bibliothek | shadcn_ui (`ShadCard`, `ShadTabs`, `ShadSelect`, `ShadButton`, `ShadInputFormField`, `ShadCalendar`, `ShadBreadcrumb`, `ShadProgress`) |
+| UI-Bibliothek | shadcn_ui (`ShadCard`, `ShadTabs`, `ShadSelect`, `ShadButton`, `ShadInputFormField`, `ShadBreadcrumb`, `ShadProgress`) |
 | Icons | `LucideIcons` (aus shadcn_ui) |
 | Backend | PocketBase (self-hosted) |
 | PocketBase SDK | `pocketbase: ^0.22.0` mit `AsyncAuthStore` |
@@ -26,6 +26,7 @@
 - Einziger Nutzer ist ein PocketBase-**Superuser** (`_superusers`-Collection).
 - `AuthService` ist ein Singleton (`AuthService.instance`) in `lib/services/auth_service.dart`.
 - Login-Ablauf: `ConnectingPage` → prüft Token → falls kein Token: `tryEnvLogin()` mit `.env`-Werten (`EMAIL`, `PASSWORD`) → sonst `LoginPage`.
+- Nach explizitem Logout wird das `.env`-Auto-Login unterdrückt, bis wieder ein manueller Login erfolgt.
 - `.env`-Keys: `BASE_URL`, `EMAIL`, `PASSWORD`.
 
 ---
@@ -51,7 +52,7 @@ lib/
     search/                   # Suche auf statischen Platzhalterdaten
     customers/                # Liste + Detail (Tabs: Allgemein / Akte)
     inquiries/                # Liste + Read-only Detail
-    invoices/                 # Liste mit Eingang/Ausgang-Tabs
+    invoices/                 # Liste mit Suche, direction wird im Frontend ignoriert
     contracts/                # Liste + Read-only Detail
   data/
     models/                   # customer.dart, inquiry.dart, invoice.dart, contract.dart, todo_item.dart
@@ -78,7 +79,7 @@ lib/
 - **Fehler-Zustände**: `Text('Fehler beim Laden')` + Fehlermeldung + `ShadButton.outline` mit `LucideIcons.refreshCw`.
 - **Listen**: `ListView.separated` mit `ShadCard`-Items, `padding: EdgeInsets.all(16)`, `SizedBox(height: 8)` als Separator.
 - **Pull-to-Refresh**: `RefreshIndicator` um die gesamte Liste.
-- **Formulare**: `ShadInputFormField` ohne Card-Wrapper, PLZ-Feld 90px breit, PLZ+Ort immer nebeneinander in einer `Row`.
+- **Formulare**: `ShadInputFormField` ohne Card-Wrapper, PLZ-Feld 160px breit, PLZ+Ort immer nebeneinander in einer `Row`.
 - **isDirty-Pattern**: TextEditingController-Listener vergleichen Texte gegen gespeicherte Ursprungswerte; Save-Button ist `null` (disabled) solange nicht dirty.
 - **Save-Button**: Immer als `_SaveBar` am unteren Rand, ausgeblendet wenn ein Tab aktiv ist, der kein Editieren erlaubt (z.B. Akte-Tab).
 - **E-Mail-Links**: `GestureDetector` → `launchUrl(Uri.parse('mailto:...'))` via `url_launcher`.
@@ -92,7 +93,7 @@ lib/
 | `_superusers` | — | Einzige Auth-Collection |
 | `customers` | `name`, `street`, `zip` (number), `town` | PATCH via `CustomersService.update()` |
 | `inquiries` | `name`, `subject`, `email`, `message`, `created`, `customer` (relation) | Read-only im UI |
-| `invoices` | `title`, `total` (number), `direction` (enum: `incoming`/`outbounding`), `created`, `customer` (relation) | Tabs Eingang/Ausgang |
+| `invoices` | `title`, `total` (number), `direction` (enum: `incoming`/`outbounding`), `created`, `customer` (relation) | Frontend wertet `direction` nicht mehr aus; Liste ist ungefiltert mit Suche |
 | `contracts` | `keyword` (text), `is_active` (bool), `amount` (number), `customer` (relation) | Read-only im UI; in Akte-Tab sichtbar |
 | `todo` | `keyword` (text), `is_finished` (bool) | Nur im Dashboard; kein Hinzufügen im Frontend, nur Abhaken |
 

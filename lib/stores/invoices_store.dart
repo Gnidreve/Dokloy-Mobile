@@ -19,19 +19,25 @@ class InvoicesStore extends ChangeNotifier with WidgetsBindingObserver {
   List<Invoice> byCustomer(String customerId) =>
       items.where((i) => i.customerId == customerId).toList();
 
-  List<Invoice> byDirection(InvoiceDirection direction) =>
-      items.where((i) => i.direction == direction).toList();
+  List<Invoice> forQuery(String q) {
+    if (q.trim().isEmpty) return items;
+    final low = q.trim().toLowerCase();
+    return items.where((i) => i.title.toLowerCase().contains(low)).toList();
+  }
 
   Future<void> reload() => _load();
 
   Future<void> _load() async {
-    loading = true; error = null; notifyListeners();
+    loading = true;
+    error = null;
+    notifyListeners();
     try {
       items = await InvoicesService.instance.fetchAll();
     } catch (e) {
       error = e.toString();
     } finally {
-      loading = false; notifyListeners();
+      loading = false;
+      notifyListeners();
     }
   }
 

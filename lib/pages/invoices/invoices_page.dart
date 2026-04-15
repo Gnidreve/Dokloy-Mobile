@@ -12,7 +12,22 @@ class InvoicesPage extends StatefulWidget {
 }
 
 class _InvoicesPageState extends State<InvoicesPage> {
-  String _tab = 'outbounding';
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +37,9 @@ class _InvoicesPageState extends State<InvoicesPage> {
         final store = InvoicesStore.instance;
         final theme = ShadTheme.of(context);
 
-        if (store.loading) return const Center(child: CircularProgressIndicator());
+        if (store.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
         if (store.error != null) {
           return Center(
@@ -33,7 +50,11 @@ class _InvoicesPageState extends State<InvoicesPage> {
                 children: [
                   Text('Fehler beim Laden', style: theme.textTheme.h4),
                   const SizedBox(height: 8),
-                  Text(store.error!, style: theme.textTheme.muted, textAlign: TextAlign.center),
+                  Text(
+                    store.error!,
+                    style: theme.textTheme.muted,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 24),
                   ShadButton.outline(
                     onPressed: store.reload,
@@ -46,58 +67,60 @@ class _InvoicesPageState extends State<InvoicesPage> {
           );
         }
 
-        final direction = _tab == 'outbounding'
-            ? InvoiceDirection.outbounding
-            : InvoiceDirection.incoming;
-        final shown = store.byDirection(direction);
-        final emptyLabel = _tab == 'outbounding'
-            ? 'Keine Ausgangsrechnungen'
-            : 'Keine Eingangsrechnungen';
+        final items = store.forQuery(_query);
 
-        return RefreshIndicator(
-          onRefresh: store.reload,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: ShadTabs<String>(
-                  value: _tab,
-                  onChanged: (t) => setState(() => _tab = t),
-                  tabs: const [
-                    ShadTab(value: 'outbounding', content: SizedBox.shrink(), child: Text('Ausgang')),
-                    ShadTab(value: 'incoming',    content: SizedBox.shrink(), child: Text('Eingang')),
-                  ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: ShadInput(
+                controller: _searchController,
+                placeholder: const Text('Rechnungen suchen …'),
+                leading: const Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: Icon(LucideIcons.search, size: 16),
                 ),
               ),
-              Expanded(
-                child: shown.isEmpty
-                    ? CustomScrollView(slivers: [
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(LucideIcons.fileText, size: 48,
-                                    color: theme.colorScheme.mutedForeground),
-                                const SizedBox(height: 16),
-                                Text(emptyLabel,
-                                    style: theme.textTheme.muted),
-                              ],
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: store.reload,
+                child: items.isEmpty
+                    ? CustomScrollView(
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.fileText,
+                                    size: 48,
+                                    color: theme.colorScheme.mutedForeground,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Keine Rechnungen gefunden',
+                                    style: theme.textTheme.muted,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ])
+                        ],
+                      )
                     : ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: shown.length,
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                        itemCount: items.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, i) => _InvoiceCard(invoice: shown[i]),
+                        itemBuilder: (context, i) =>
+                            _InvoiceCard(invoice: items[i]),
                       ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -127,7 +150,9 @@ class _InvoiceCard extends StatelessWidget {
               children: [
                 Text(
                   invoice.title,
-                  style: theme.textTheme.p.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.p.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(dateStr, style: theme.textTheme.muted),

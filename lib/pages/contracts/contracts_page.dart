@@ -16,7 +16,9 @@ class ContractsPage extends StatelessWidget {
         final store = ContractsStore.instance;
         final theme = ShadTheme.of(context);
 
-        if (store.loading) return const Center(child: CircularProgressIndicator());
+        if (store.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
         if (store.error != null) {
           return Center(
@@ -27,7 +29,11 @@ class ContractsPage extends StatelessWidget {
                 children: [
                   Text('Fehler beim Laden', style: theme.textTheme.h4),
                   const SizedBox(height: 8),
-                  Text(store.error!, style: theme.textTheme.muted, textAlign: TextAlign.center),
+                  Text(
+                    store.error!,
+                    style: theme.textTheme.muted,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 24),
                   ShadButton.outline(
                     onPressed: store.reload,
@@ -45,28 +51,38 @@ class ContractsPage extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: store.reload,
           child: items.isEmpty
-              ? CustomScrollView(slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(LucideIcons.fileText, size: 48,
-                              color: ShadTheme.of(context).colorScheme.mutedForeground),
-                          const SizedBox(height: 16),
-                          Text('Keine Verträge vorhanden',
-                              style: ShadTheme.of(context).textTheme.muted),
-                        ],
+              ? CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              LucideIcons.fileText,
+                              size: 48,
+                              color: ShadTheme.of(
+                                context,
+                              ).colorScheme.mutedForeground,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Keine Verträge vorhanden',
+                              style: ShadTheme.of(context).textTheme.muted,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ])
+                  ],
+                )
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: items.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (context, i) => _ContractCard(contract: items[i]),
+                  itemBuilder: (context, i) =>
+                      _ContractCard(contract: items[i]),
                 ),
         );
       },
@@ -98,30 +114,23 @@ class _ContractCard extends StatelessWidget {
                 children: [
                   Text(
                     contract.keyword,
-                    style: theme.textTheme.p.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.p.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 2),
-                  Text(amountStr, style: theme.textTheme.muted),
+                  Text(
+                    '$amountStr · ${contract.isActive ? 'Aktiv' : 'Inaktiv'}',
+                    style: theme.textTheme.muted,
+                  ),
                 ],
               ),
             ),
-            ShadBadge(
-              backgroundColor: contract.isActive
-                  ? const Color(0xFF16a34a)
-                  : theme.colorScheme.muted,
-              child: Text(
-                contract.isActive ? 'Aktiv' : 'Inaktiv',
-                style: TextStyle(
-                  color: contract.isActive
-                      ? Colors.white
-                      : theme.colorScheme.mutedForeground,
-                  fontSize: 11,
-                ),
-              ),
+            Icon(
+              LucideIcons.chevronRight,
+              size: 16,
+              color: theme.colorScheme.mutedForeground,
             ),
-            const SizedBox(width: 8),
-            Icon(LucideIcons.chevronRight, size: 16,
-                color: theme.colorScheme.mutedForeground),
           ],
         ),
       ),

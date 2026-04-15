@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../data/models/invoice.dart';
 import '../../data/services/invoices_service.dart';
+import '../../data/models/invoice.dart';
 
 class InvoiceDetailPage extends StatefulWidget {
   const InvoiceDetailPage({super.key, required this.invoiceId});
@@ -25,7 +25,10 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final data = await InvoicesService.instance.fetchOne(widget.invoiceId);
       if (mounted) setState(() => _invoice = data);
@@ -51,7 +54,11 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
             children: [
               Text('Fehler beim Laden', style: theme.textTheme.h4),
               const SizedBox(height: 8),
-              Text(_error!, style: theme.textTheme.muted, textAlign: TextAlign.center),
+              Text(
+                _error!,
+                style: theme.textTheme.muted,
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 24),
               ShadButton.outline(
                 onPressed: _load,
@@ -68,7 +75,6 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
     final dateStr =
         '${inv.createdAt.day.toString().padLeft(2, '0')}.${inv.createdAt.month.toString().padLeft(2, '0')}.${inv.createdAt.year}';
     final amountStr = '${inv.amount.toStringAsFixed(2).replaceAll('.', ',')} €';
-    final directionStr = inv.direction == InvoiceDirection.incoming ? 'Eingang' : 'Ausgang';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -78,8 +84,6 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
           _KV(label: 'Titel', value: inv.title),
           const SizedBox(height: 16),
           _KV(label: 'Betrag', value: amountStr),
-          const SizedBox(height: 16),
-          _KV(label: 'Richtung', value: directionStr),
           const SizedBox(height: 16),
           _KV(label: 'Datum', value: dateStr),
         ],

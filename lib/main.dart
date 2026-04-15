@@ -108,7 +108,7 @@ class _MyCrmAppState extends State<MyCrmApp> {
           // Temporary Changed: Schriftgröße auf 150% erhöht
           data: MediaQuery.of(
             context,
-          ).copyWith(textScaler: const TextScaler.linear(1.5)),
+          ).copyWith(textScaler: const TextScaler.linear(1.11)),
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: bg,

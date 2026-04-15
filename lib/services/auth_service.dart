@@ -8,6 +8,7 @@ class AuthService {
   static final instance = AuthService._();
 
   static const _storageKey = 'pb_auth';
+  static const _skipEnvLoginKey = 'skip_env_login';
 
   final _storage = const FlutterSecureStorage();
 
@@ -75,6 +76,8 @@ class AuthService {
   /// Versucht automatischen Login aus .env (nur für Development).
   /// Gibt true zurück wenn erfolgreich, false wenn keine Env-Vars vorhanden.
   Future<bool> tryEnvLogin() async {
+    if (await _shouldSkipEnvLogin()) return false;
+
     final email = dotenv.env['EMAIL']?.trim() ?? '';
     final password = dotenv.env['PASSWORD']?.trim() ?? '';
     if (email.isEmpty || password.isEmpty) return false;
@@ -84,9 +87,27 @@ class AuthService {
 
   Future<void> login(String email, String password) async {
     await pb.collection('_superusers').authWithPassword(email, password);
+    await _clearSkipEnvLogin();
   }
 
   Future<void> logout() async {
     pb.authStore.clear();
+    try {
+      await _storage.write(key: _skipEnvLoginKey, value: 'true');
+    } catch (_) {}
+  }
+
+  Future<bool> _shouldSkipEnvLogin() async {
+    try {
+      return await _storage.read(key: _skipEnvLoginKey) == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _clearSkipEnvLogin() async {
+    try {
+      await _storage.delete(key: _skipEnvLoginKey);
+    } catch (_) {}
   }
 }

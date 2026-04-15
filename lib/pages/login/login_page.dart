@@ -49,8 +49,9 @@ class _LoginPageState extends State<LoginPage> {
       final msg = e.response['message'];
       if (msg is String && msg.isNotEmpty) return msg;
       if (e.statusCode == 400) return 'Falsche E-Mail oder falsches Passwort.';
-      if (e.statusCode == 0)
+      if (e.statusCode == 0) {
         return 'Server nicht erreichbar. Bitte Verbindung prüfen.';
+      }
       return 'Fehler ${e.statusCode}: ${e.response}';
     }
     return e.toString();

@@ -4,7 +4,6 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../navigation/navigation_tree.dart';
 import '../../services/auth_service.dart';
-import '../../services/sync_service.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.onToggleTheme});
@@ -16,6 +15,7 @@ class AppDrawer extends StatelessWidget {
     final location = GoRouterState.of(context).uri.path;
 
     return Drawer(
+      width: 288,
       child: SafeArea(
         child: Column(
           children: [
@@ -26,7 +26,8 @@ class AppDrawer extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: [
                   for (final group in navigationTree) ...[
-                    if (group.label.isNotEmpty) _SectionLabel(label: group.label),
+                    if (group.label.isNotEmpty)
+                      _SectionLabel(label: group.label),
                     for (final section in group.sections) ...[
                       if (section.label.isNotEmpty)
                         _SubsectionLabel(label: section.label),
@@ -63,7 +64,7 @@ class _DrawerHeader extends StatelessWidget {
           // const Icon(LucideIcons.layoutDashboard, size: 22),
           // const SizedBox(width: 12),
           Text(
-            'Customer Relationship Management',
+            'Customer Management',
             style: ShadTheme.of(
               context,
             ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
@@ -182,10 +183,7 @@ class _DrawerFooterState extends State<_DrawerFooter> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
-                ShadAvatar(
-                  null,
-                  placeholder: Text(auth.currentUserInitials),
-                ),
+                ShadAvatar(null, placeholder: Text(auth.currentUserInitials)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -196,9 +194,9 @@ class _DrawerFooterState extends State<_DrawerFooter> {
                         auth.currentUserName.isNotEmpty
                             ? auth.currentUserName
                             : 'Account',
-                        style: ShadTheme.of(context).textTheme.p.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: ShadTheme.of(
+                          context,
+                        ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         auth.currentUserEmail,
@@ -226,6 +224,41 @@ class _AccountPopoverContent extends StatelessWidget {
   final VoidCallback onToggleTheme;
   final VoidCallback onClose;
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final shouldLogout = await showShadDialog<bool>(
+      context: context,
+      builder: (context) => ShadDialog.alert(
+        title: const Text('Wirklich abmelden?'),
+        description: const Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Du wirst von diesem Gerät abgemeldet und musst dich anschließend erneut anmelden.',
+          ),
+        ),
+        actions: [
+          ShadButton.outline(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          ShadButton.destructive(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Endgültig abmelden'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout != true || !context.mounted) return;
+
+    onClose();
+    Scaffold.of(context).closeDrawer();
+    await AuthService.instance.logout();
+
+    if (context.mounted) {
+      context.go('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = AuthService.instance;
@@ -250,9 +283,9 @@ class _AccountPopoverContent extends StatelessWidget {
                         auth.currentUserName.isNotEmpty
                             ? auth.currentUserName
                             : 'Account',
-                        style: ShadTheme.of(context).textTheme.p.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: ShadTheme.of(
+                          context,
+                        ).textTheme.p.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         auth.currentUserEmail,
@@ -282,17 +315,7 @@ class _AccountPopoverContent extends StatelessWidget {
               context.go('/settings');
             },
           ),
-          _PopoverItem(
-            label: 'Abmelden',
-            onTap: () async {
-              onClose();
-              await auth.logout();
-              if (context.mounted) {
-                Scaffold.of(context).closeDrawer();
-                context.go('/connecting');
-              }
-            },
-          ),
+          _PopoverItem(label: 'Abmelden', onTap: () => _confirmLogout(context)),
         ],
       ),
     );

@@ -44,14 +44,24 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   void initState() {
     super.initState();
     _load();
-    for (final c in [_nameController, _streetController, _zipController, _townController]) {
+    for (final c in [
+      _nameController,
+      _streetController,
+      _zipController,
+      _townController,
+    ]) {
       c.addListener(_checkDirty);
     }
   }
 
   @override
   void dispose() {
-    for (final c in [_nameController, _streetController, _zipController, _townController]) {
+    for (final c in [
+      _nameController,
+      _streetController,
+      _zipController,
+      _townController,
+    ]) {
       c.removeListener(_checkDirty);
       c.dispose();
     }
@@ -59,7 +69,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   }
 
   void _checkDirty() {
-    final dirty = _nameController.text != _origName ||
+    final dirty =
+        _nameController.text != _origName ||
         _streetController.text != _origStreet ||
         _zipController.text != _origZip ||
         _townController.text != _origTown;
@@ -67,18 +78,21 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final data = await CustomersService.instance.fetchOne(widget.customerId);
       if (!mounted) return;
-      _origName   = data.name;
+      _origName = data.name;
       _origStreet = data.street;
-      _origZip    = data.zip == 0 ? '' : data.zip.toString();
-      _origTown   = data.town;
-      _nameController.text   = _origName;
+      _origZip = data.zip == 0 ? '' : data.zip.toString();
+      _origTown = data.town;
+      _nameController.text = _origName;
       _streetController.text = _origStreet;
-      _zipController.text    = _origZip;
-      _townController.text   = _origTown;
+      _zipController.text = _origZip;
+      _townController.text = _origTown;
       setState(() => _isDirty = false);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -93,20 +107,26 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     try {
       await CustomersService.instance.update(
         widget.customerId,
-        name:   _nameController.text.trim(),
+        name: _nameController.text.trim(),
         street: _streetController.text.trim(),
-        zip:    zip,
-        town:   _townController.text.trim(),
+        zip: zip,
+        town: _townController.text.trim(),
       );
       if (!mounted) return;
-      _origName   = _nameController.text;
+      _origName = _nameController.text;
       _origStreet = _streetController.text;
-      _origZip    = _zipController.text;
-      _origTown   = _townController.text;
+      _origZip = _zipController.text;
+      _origTown = _townController.text;
       setState(() => _isDirty = false);
       AppToast.showSuccess(context, title: 'Gespeichert');
     } catch (e) {
-      if (mounted) AppToast.showError(context, title: 'Fehler beim Speichern', subtitle: e.toString());
+      if (mounted) {
+        AppToast.showError(
+          context,
+          title: 'Fehler beim Speichern',
+          subtitle: e.toString(),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -127,7 +147,11 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
             children: [
               Text('Fehler beim Laden', style: theme.textTheme.h4),
               const SizedBox(height: 8),
-              Text(_error!, style: theme.textTheme.muted, textAlign: TextAlign.center),
+              Text(
+                _error!,
+                style: theme.textTheme.muted,
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 24),
               ShadButton.outline(
                 onPressed: _load,
@@ -153,24 +177,35 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
             value: _tab,
             onChanged: (t) => setState(() => _tab = t),
             tabs: const [
-              ShadTab(value: 'allgemein', content: SizedBox.shrink(), child: Text('Allgemein')),
-              ShadTab(value: 'akte',      content: SizedBox.shrink(), child: Text('Akte')),
+              ShadTab(
+                value: 'allgemein',
+                content: SizedBox.shrink(),
+                child: Text('Allgemein'),
+              ),
+              ShadTab(
+                value: 'akte',
+                content: SizedBox.shrink(),
+                child: Text('Akte'),
+              ),
             ],
           ),
         ),
         // Inhalt je Tab
         Expanded(
-          child: onAkte ? _AkteTab(customerId: widget.customerId) : _AllgemeinTab(
-            nameController:   _nameController,
-            streetController: _streetController,
-            zipController:    _zipController,
-            townController:   _townController,
-            saving:           _saving,
-            h:                h,
-            onSubmit:         _save,
-          ),
+          child: onAkte
+              ? _AkteTab(customerId: widget.customerId)
+              : _AllgemeinTab(
+                  nameController: _nameController,
+                  streetController: _streetController,
+                  zipController: _zipController,
+                  townController: _townController,
+                  saving: _saving,
+                  h: h,
+                  onSubmit: _save,
+                ),
         ),
-        if (!onAkte) _SaveBar(saving: _saving, isDirty: _isDirty, onSave: _save),
+        if (!onAkte)
+          _SaveBar(saving: _saving, isDirty: _isDirty, onSave: _save),
       ],
     );
   }
@@ -232,7 +267,7 @@ class _AllgemeinTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 90,
+                  width: 160,
                   child: ShadInputFormField(
                     controller: zipController,
                     label: const Text('PLZ'),
@@ -294,12 +329,13 @@ class _AkteTabState extends State<_AkteTab> {
   Widget _buildContent(BuildContext context) {
     final theme = ShadTheme.of(context);
 
-    final loading = InquiriesStore.instance.loading ||
+    final loading =
+        InquiriesStore.instance.loading ||
         InvoicesStore.instance.loading ||
         ContractsStore.instance.loading;
 
     final showInquiries = _filter == 'alle' || _filter == 'anfragen';
-    final showInvoices  = _filter == 'alle' || _filter == 'rechnungen';
+    final showInvoices = _filter == 'alle' || _filter == 'rechnungen';
     final showContracts = _filter == 'alle' || _filter == 'vertraege';
 
     final visibleInquiries = showInquiries
@@ -311,7 +347,8 @@ class _AkteTabState extends State<_AkteTab> {
     final visibleContracts = showContracts
         ? ContractsStore.instance.byCustomer(widget.customerId)
         : const <Contract>[];
-    final isEmpty = visibleInquiries.isEmpty &&
+    final isEmpty =
+        visibleInquiries.isEmpty &&
         visibleInvoices.isEmpty &&
         visibleContracts.isEmpty;
 
@@ -323,19 +360,17 @@ class _AkteTabState extends State<_AkteTab> {
           ShadSelect<String>(
             initialValue: 'alle',
             options: const [
-              ShadOption(value: 'alle',       child: Text('Alles')),
-              ShadOption(value: 'anfragen',   child: Text('Anfragen')),
+              ShadOption(value: 'alle', child: Text('Alles')),
+              ShadOption(value: 'anfragen', child: Text('Anfragen')),
               ShadOption(value: 'rechnungen', child: Text('Rechnungen')),
-              ShadOption(value: 'vertraege',  child: Text('Verträge')),
+              ShadOption(value: 'vertraege', child: Text('Verträge')),
             ],
-            selectedOptionBuilder: (_, v) => Text(
-              switch (v) {
-                'anfragen'   => 'Anfragen',
-                'rechnungen' => 'Rechnungen',
-                'vertraege'  => 'Verträge',
-                _            => 'Alles',
-              },
-            ),
+            selectedOptionBuilder: (_, v) => Text(switch (v) {
+              'anfragen' => 'Anfragen',
+              'rechnungen' => 'Rechnungen',
+              'vertraege' => 'Verträge',
+              _ => 'Alles',
+            }),
             onChanged: (v) => setState(() => _filter = v ?? 'alle'),
           ),
           const SizedBox(height: 24),
@@ -367,9 +402,8 @@ class _AkteTabState extends State<_AkteTab> {
               for (final inv in visibleInvoices)
                 _AkteCard(
                   title: inv.title,
-                  subtitle: inv.direction == InvoiceDirection.incoming
-                      ? 'Eingang'
-                      : 'Ausgang',
+                  subtitle:
+                      '${inv.amount.toStringAsFixed(2).replaceAll('.', ',')} €',
                   onTap: () => context.push('/invoices/${inv.id}'),
                 ),
             ],
@@ -382,7 +416,8 @@ class _AkteTabState extends State<_AkteTab> {
               for (final con in visibleContracts)
                 _AkteCard(
                   title: con.keyword,
-                  subtitle: '${con.amount.toStringAsFixed(2).replaceAll('.', ',')} € · ${con.isActive ? 'Aktiv' : 'Inaktiv'}',
+                  subtitle:
+                      '${con.amount.toStringAsFixed(2).replaceAll('.', ',')} € · ${con.isActive ? 'Aktiv' : 'Inaktiv'}',
                   onTap: () => context.push('/contracts/${con.id}'),
                 ),
             ],
@@ -394,7 +429,11 @@ class _AkteTabState extends State<_AkteTab> {
 }
 
 class _AkteCard extends StatelessWidget {
-  const _AkteCard({required this.title, required this.subtitle, required this.onTap});
+  const _AkteCard({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
   final String title;
   final String subtitle;
@@ -416,15 +455,22 @@ class _AkteCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: theme.textTheme.p.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      title,
+                      style: theme.textTheme.p.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(subtitle, style: theme.textTheme.muted),
                   ],
                 ),
               ),
-              Icon(LucideIcons.chevronRight, size: 16,
-                  color: theme.colorScheme.mutedForeground),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 16,
+                color: theme.colorScheme.mutedForeground,
+              ),
             ],
           ),
         ),
@@ -436,7 +482,11 @@ class _AkteCard extends StatelessWidget {
 // ─── Save Bar ─────────────────────────────────────────────────────────────────
 
 class _SaveBar extends StatelessWidget {
-  const _SaveBar({required this.saving, required this.isDirty, required this.onSave});
+  const _SaveBar({
+    required this.saving,
+    required this.isDirty,
+    required this.onSave,
+  });
 
   final bool saving;
   final bool isDirty;
@@ -452,7 +502,11 @@ class _SaveBar extends StatelessWidget {
           width: double.infinity,
           onPressed: (saving || !isDirty) ? null : onSave,
           child: saving
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Speichern'),
         ),
       ),

@@ -22,20 +22,7 @@ class InvoicesService {
   Future<List<Invoice>> fetchByCustomer(String customerId) async {
     final records = await AuthService.instance.pb
         .collection('invoices')
-        .getFullList(
-          sort: '-created',
-          filter: 'customer = "$customerId"',
-        );
-    return records.map(Invoice.fromRecord).toList();
-  }
-
-  Future<List<Invoice>> fetchByDirection(InvoiceDirection direction) async {
-    final filter = direction == InvoiceDirection.incoming
-        ? 'direction = "incoming"'
-        : 'direction = "outbounding"';
-    final records = await AuthService.instance.pb
-        .collection('invoices')
-        .getFullList(sort: '-created', filter: filter);
+        .getFullList(sort: '-created', filter: 'customer = "$customerId"');
     return records.map(Invoice.fromRecord).toList();
   }
 }
