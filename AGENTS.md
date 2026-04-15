@@ -61,15 +61,15 @@ lib/
     login/
     home/                     # Dashboard: Aufgaben-Liste (todo-Collection)
     settings/
-    search/                   # Suche auf statischen Platzhalterdaten
-    customers/                # Liste + Detail (Tabs: Allgemein / Akte)
+    search/                   # Globale Suche via PocketBase-Queries über mehrere Collections
+  customers/                # Liste + Detail (Tabs: Allgemein / Akte)
     inquiries/                # Liste + Read-only Detail
     invoices/                 # Liste mit Suche, direction wird im Frontend ignoriert
     emails/                   # Liste + Read-only Detail, zeigt subject sowie von/an
     contracts/                # Liste + Read-only Detail
   data/
-    models/                   # customer.dart, inquiry.dart, invoice.dart, email_item.dart, contract.dart, todo_item.dart
-    services/                 # customers_service.dart, inquiries_service.dart, invoices_service.dart, emails_service.dart, contracts_service.dart, todos_service.dart
+    models/                   # customer.dart, inquiry.dart, invoice.dart, email_item.dart, contract.dart, todo_item.dart, search_result.dart
+    services/                 # customers_service.dart, inquiries_service.dart, invoices_service.dart, emails_service.dart, contracts_service.dart, todos_service.dart, search_service.dart
 ```
 
 ---
