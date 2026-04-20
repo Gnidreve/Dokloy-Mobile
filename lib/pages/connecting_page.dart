@@ -25,7 +25,7 @@ class _ConnectingPageState extends State<ConnectingPage> {
 
     // Bereits eingeloggt (Token aus SecureStorage noch gültig)
     if (auth.isLoggedIn) {
-      if (mounted) context.go('/home');
+      if (mounted) context.go('/search');
       return;
     }
 
@@ -34,7 +34,7 @@ class _ConnectingPageState extends State<ConnectingPage> {
       final didLogin = await auth.tryEnvLogin();
       if (!mounted) return;
       if (didLogin) {
-        context.go('/home');
+        context.go('/search');
       } else {
         context.go('/login');
       }

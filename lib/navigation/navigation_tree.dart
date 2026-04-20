@@ -35,14 +35,9 @@ const navigationTree = <NavigationGroup>[
         label: '',
         items: [
           NavigationItem(
-            label: 'Suche',
+            label: 'Globale Suche',
             route: '/search',
             icon: LucideIcons.search,
-          ),
-          NavigationItem(
-            label: 'Dashboard',
-            route: '/home',
-            icon: LucideIcons.layoutDashboard,
           ),
           NavigationItem(
             label: 'Kontakte',

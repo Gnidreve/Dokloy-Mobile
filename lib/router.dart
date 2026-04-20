@@ -14,7 +14,6 @@ import 'pages/customers/customer_detail_page.dart';
 import 'pages/emails/email_detail_page.dart';
 import 'pages/customers/customers_page.dart';
 import 'pages/emails/emails_page.dart';
-import 'pages/home/home_page.dart';
 import 'pages/inquiries/inquiries_page.dart';
 import 'pages/inquiries/inquiry_detail_page.dart';
 import 'pages/invoices/invoice_detail_page.dart';
@@ -27,7 +26,6 @@ import 'stores/customers_store.dart';
 import 'stores/emails_store.dart';
 import 'stores/inquiries_store.dart';
 import 'stores/invoices_store.dart';
-import 'stores/todos_store.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -47,7 +45,6 @@ GoRouter createRouter({required VoidCallback onToggleTheme}) => GoRouter(
           _ShellWrapper(onToggleTheme: onToggleTheme, child: child),
       routes: [
         GoRoute(path: '/search', builder: (_, _) => const SearchPage()),
-        GoRoute(path: '/home', builder: (_, _) => const HomePage()),
         GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
         GoRoute(
           path: '/customers',
@@ -132,7 +129,6 @@ class _ShellWrapperState extends State<_ShellWrapper> {
     InvoicesStore.instance;
     EmailsStore.instance;
     ContractsStore.instance;
-    TodosStore.instance;
   }
 
   @override
@@ -190,20 +186,20 @@ class _ShellWrapperState extends State<_ShellWrapper> {
                       },
                       child: Text(
                         seg.label,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                     )
                   else
                     Text(
                       seg.label,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                     ),
               ],
             ),
           ],
         ),
       ),
-      body: _NotificationLayer(child: widget.child),
+      body: SafeArea(top: false, child: _NotificationLayer(child: widget.child)),
     );
   }
 }

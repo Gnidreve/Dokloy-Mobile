@@ -154,64 +154,61 @@ class _SearchPageState extends State<SearchPage> {
                         horizontal: 16,
                         vertical: 14,
                       ),
-                      child: InkWell(
+                      child: Material(
+                        type: MaterialType.transparency,
+                        clipBehavior: Clip.antiAlias,
                         borderRadius: BorderRadius.circular(8),
-                        onTap: () => context.go(item.route),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.muted,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Icon(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => context.go(item.route),
+                          child: Row(
+                            children: [
+                              Icon(
                                 _iconForType(item.type),
-                                size: 16,
+                                size: 20,
                                 color: theme.colorScheme.mutedForeground,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.title,
+                                      style: theme.textTheme.p.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (item.subtitle.trim().isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        item.subtitle,
+                                        style: theme.textTheme.muted,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    item.title,
-                                    style: theme.textTheme.p.copyWith(
-                                      fontWeight: FontWeight.w600,
+                                    item.type,
+                                    style: theme.textTheme.muted.copyWith(
+                                      fontSize: 11,
                                     ),
                                   ),
-                                  if (item.subtitle.trim().isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      item.subtitle,
-                                      style: theme.textTheme.muted,
-                                    ),
-                                  ],
+                                  const SizedBox(height: 4),
+                                  Icon(
+                                    LucideIcons.chevronRight,
+                                    size: 16,
+                                    color: theme.colorScheme.mutedForeground,
+                                  ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  item.type,
-                                  style: theme.textTheme.muted.copyWith(
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Icon(
-                                  LucideIcons.chevronRight,
-                                  size: 16,
-                                  color: theme.colorScheme.mutedForeground,
-                                ),
-                              ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -225,8 +222,8 @@ class _SearchPageState extends State<SearchPage> {
   IconData _iconForType(String type) => switch (type) {
     'Kontakt' => LucideIcons.users,
     'Anfrage' => LucideIcons.mail,
-    'Rechnung' => LucideIcons.fileText,
-    'E-Mail' => LucideIcons.mailOpen,
+    'Vertrag' => LucideIcons.fileText,
+    'E-Mail' => LucideIcons.mail,
     _ => LucideIcons.fileText,
   };
 }

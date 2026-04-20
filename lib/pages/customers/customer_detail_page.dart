@@ -521,32 +521,37 @@ class _AkteCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: ShadCard(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: InkWell(
+        child: Material(
+          type: MaterialType.transparency,
+          clipBehavior: Clip.antiAlias,
           borderRadius: BorderRadius.circular(8),
-          onTap: onTap,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.p.copyWith(
-                        fontWeight: FontWeight.w600,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onTap,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.p.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: theme.textTheme.muted),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(subtitle, style: theme.textTheme.muted),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                LucideIcons.chevronRight,
-                size: 16,
-                color: theme.colorScheme.mutedForeground,
-              ),
-            ],
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 16,
+                  color: theme.colorScheme.mutedForeground,
+                ),
+              ],
+            ),
           ),
         ),
       ),

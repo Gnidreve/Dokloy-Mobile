@@ -45,50 +45,40 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               ShadCard(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Notification Enabled',
-                                style: theme.textTheme.p.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Fordert die Android-Berechtigung an und speichert den aktuellen Device-Token beim eingeloggten Superuser.',
-                                style: theme.textTheme.muted,
-                              ),
-                            ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Benachrichtigungen',
+                            style: theme.textTheme.p.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        if (notifications.loading)
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        else
-                          ShadSwitch(
-                            value: notifications.enabled,
-                            enabled: notifications.isSupported,
-                            onChanged: _onNotificationsChanged,
+                          const SizedBox(height: 2),
+                          Text(
+                            'Push-Benachrichtigungen aktivieren',
+                            style: theme.textTheme.muted,
                           ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      notifications.statusText,
-                      style: theme.textTheme.muted,
-                    ),
+                    const SizedBox(width: 12),
+                    if (notifications.loading)
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      ShadSwitch(
+                        value: notifications.enabled,
+                        enabled: notifications.isSupported,
+                        onChanged: _onNotificationsChanged,
+                      ),
                   ],
                 ),
               ),

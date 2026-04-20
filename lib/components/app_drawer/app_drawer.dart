@@ -183,8 +183,6 @@ class _DrawerFooterState extends State<_DrawerFooter> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
-                ShadAvatar(null, placeholder: Text(auth.currentUserInitials)),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
